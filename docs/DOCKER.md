@@ -23,7 +23,8 @@ Runs PostgreSQL for the backend API.
 
 - Image: `postgres:16-alpine`
 - Container: `kng-fashion-postgres`
-- Port: `5432`
+- Host port: `5433`
+- Container port: `5432`
 - Database: `kng_fashion`
 - User: look into secret
 - Password: look into secret
@@ -47,7 +48,7 @@ Adminer waits for PostgreSQL to become healthy before starting.
 Use this in `backend/.env` when running the backend directly on your machine:
 
 ```env
-DATABASE_URL="postgresql://admin_username:admin_password@localhost:5432/kng_fashion?schema=public"
+DATABASE_URL="postgresql://admin_username:admin_password@localhost:5433/kng_fashion?schema=public"
 ```
 
 Docker Compose passes a container-safe URL to the backend service:

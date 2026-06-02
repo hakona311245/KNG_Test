@@ -33,21 +33,21 @@ Tasks:
 
 - [x] Create `backend/` NestJS project.
 - [ ] Create `frontend/` Vite React project.
-- [ ] Add root `docker-compose.yml`.
-- [ ] Add backend `.env.example`.
+- [x] Add root `docker-compose.yml`.
+- [x] Add backend `.env.example`.
 - [ ] Add frontend `.env.example`.
 - [ ] Add root README command section or link to `docs/system_spec.md`.
-- [ ] Confirm planned URLs:
+- [x] Confirm planned URLs:
   - Frontend: `http://localhost:5173`
   - Backend API: `http://localhost:3000/api`
   - Swagger: `http://localhost:3000/api/docs`
-  - PostgreSQL: `localhost:5432`
+  - PostgreSQL: `localhost:5433`
 
 Done when:
 
 - [ ] Backend starts locally.
 - [ ] Frontend starts locally.
-- [ ] Docker Compose can start PostgreSQL.
+- [x] Docker Compose can start PostgreSQL.
 
 ## Phase 2: Backend Foundation
 
@@ -55,21 +55,21 @@ Goal: prepare NestJS for consistent API behavior.
 
 Tasks:
 
-- [ ] Configure global API prefix `/api`.
-- [ ] Configure CORS with credentials enabled for the frontend URL.
-- [ ] Configure environment loading and validation.
-- [ ] Configure global validation pipe.
+- [x] Configure global API prefix `/api`.
+- [x] Configure CORS with credentials enabled for the frontend URL.
+- [x] Configure environment loading and validation.
+- [x] Configure global validation pipe.
 - [ ] Configure common error response behavior.
-- [ ] Configure Swagger at `/api/docs`.
-- [ ] Add shared role enum/constants.
-- [ ] Add auth guard and role guard structure.
-- [ ] Add Prisma module/service.
+- [x] Configure Swagger at `/api/docs`.
+- [x] Add shared role enum/constants.
+- [x] Add auth guard and role guard structure.
+- [x] Add Prisma module/service.
 
 Done when:
 
-- [ ] `GET /api/docs` opens Swagger.
-- [ ] Backend can connect to PostgreSQL.
-- [ ] Basic health or bootstrap route confirms API is running.
+- [x] `GET /api/docs` opens Swagger.
+- [x] Backend can connect to PostgreSQL.
+- [x] Basic health or bootstrap route confirms API is running.
 
 ## Phase 3: Database Schema and Seed
 
@@ -77,7 +77,7 @@ Goal: implement the data model from `docs/02_DATA_MODEL.md`.
 
 Tasks:
 
-- [ ] Add Prisma enums:
+- [x] Add Prisma enums:
   - `UserRole`
   - `UserStatus`
   - `ProductType`
@@ -85,29 +85,28 @@ Tasks:
   - `PaymentOption`
   - `PaymentStatus`
   - `OrderStatus`
-- [ ] Add `User` model.
-- [ ] Add `RefreshSession` model.
-- [ ] Add `Product` model.
-- [ ] Add `ProductVariant` model.
-- [ ] Add `Cart` model.
-- [ ] Add `CartItem` model.
-- [ ] Add `Order` model.
-- [ ] Add `OrderItem` model.
-- [ ] Add `OrderCancellationRequest` model.
-- [ ] Add unique constraints:
+- [x] Add `User` model.
+- [x] Add `RefreshSession` model.
+- [x] Add `Product` model.
+- [x] Add `ProductVariant` model.
+- [x] Add `Cart` model.
+- [x] Add `CartItem` model.
+- [x] Add `Order` model.
+- [x] Add `OrderItem` model.
+- [x] Add `OrderCancellationRequest` model.
+- [x] Add unique constraints:
   - Unique user email.
   - Unique active variant by product, size, and color where practical.
-- [ ] Add soft delete fields where documented.
-- [ ] Add initial migration.
-- [ ] Add seed script for:
-  - Manual/admin demo user.
-  - Placeholder products.
-  - Product variants with stock.
+- [x] Add soft delete fields where documented.
+- [x] Add initial migration.
+- [x] Add seed script for manual/admin demo user.
+- [ ] Add seed script for placeholder products.
+- [ ] Add seed script for product variants with stock.
 
 Done when:
 
-- [ ] `npx prisma migrate dev` succeeds.
-- [ ] `npx prisma db seed` creates demo data.
+- [x] `npx prisma migrate dev` succeeds.
+- [x] `npm run db:seed` creates the demo admin account in Docker.
 - [ ] Prisma Studio can inspect seeded data.
 
 ## Phase 4: User Service and Authentication
@@ -118,20 +117,20 @@ Feature spec: `docs/features/authenication.md`
 
 Backend tasks:
 
-- [ ] Implement customer registration.
-- [ ] Implement email/password login.
-- [ ] Hash passwords.
-- [ ] Issue access token through HttpOnly cookie.
-- [ ] Issue refresh token through HttpOnly cookie.
-- [ ] Store hashed refresh sessions.
-- [ ] Implement refresh-token rotation.
-- [ ] Implement logout and refresh-session revocation.
-- [ ] Implement current-user endpoint.
-- [ ] Implement admin customer list.
-- [ ] Implement admin customer detail.
-- [ ] Implement admin customer status update.
-- [ ] Block login/refresh for `BLOCKED` and `INACTIVE` users.
-- [ ] Add Swagger decorators for User service endpoints.
+- [x] Implement customer registration.
+- [x] Implement email/password login.
+- [x] Hash passwords.
+- [x] Issue access token through HttpOnly cookie.
+- [x] Issue refresh token through HttpOnly cookie.
+- [x] Store hashed refresh sessions.
+- [x] Implement refresh-token rotation.
+- [x] Implement logout and refresh-session revocation.
+- [x] Implement current-user endpoint.
+- [x] Implement admin customer list.
+- [x] Implement admin customer detail.
+- [x] Implement admin customer status update.
+- [x] Block login/refresh for `BLOCKED` and `INACTIVE` users.
+- [x] Add Swagger decorators for User service endpoints.
 
 Frontend tasks:
 
@@ -146,10 +145,10 @@ Frontend tasks:
 
 Done when:
 
-- [ ] Customer can register, log in, refresh session, and log out.
-- [ ] Admin can log in.
-- [ ] Customer cannot access admin routes.
-- [ ] Blocked/inactive users cannot log in.
+- [x] Customer can register, log in, refresh session, and log out.
+- [x] Admin can log in.
+- [x] Customer cannot access admin routes.
+- [x] Blocked/inactive users cannot log in.
 
 ## Phase 5: Product Service
 
@@ -270,24 +269,24 @@ Goal: run the whole app from Docker Compose.
 
 Tasks:
 
-- [ ] Add backend Dockerfile.
+- [x] Add backend Dockerfile.
 - [ ] Add frontend Dockerfile.
-- [ ] Add PostgreSQL service to Docker Compose.
-- [ ] Add backend service to Docker Compose.
+- [x] Add PostgreSQL service to Docker Compose.
+- [x] Add backend service to Docker Compose.
 - [ ] Add frontend service to Docker Compose.
-- [ ] Add persistent PostgreSQL volume.
-- [ ] Wire backend `DATABASE_URL` for Docker network.
+- [x] Add persistent PostgreSQL volume.
+- [x] Wire backend `DATABASE_URL` for Docker network.
 - [ ] Wire frontend API base URL.
-- [ ] Document Docker commands in README or link `docs/system_spec.md`.
-- [ ] Verify migrations can run in Docker.
-- [ ] Verify seed can run in Docker.
+- [x] Document Docker commands in README or link `docs/system_spec.md`.
+- [x] Verify migrations can run in Docker.
+- [x] Verify seed can run in Docker.
 
 Done when:
 
 - [ ] `docker compose up --build` starts frontend, backend, and PostgreSQL.
 - [ ] Frontend can call backend from Docker setup.
-- [ ] Backend can connect to PostgreSQL from Docker setup.
-- [ ] Swagger is available at the documented URL.
+- [x] Backend can connect to PostgreSQL from Docker setup.
+- [x] Swagger is available at the documented URL.
 
 ## Phase 9: Testing and Verification
 
@@ -295,12 +294,12 @@ Goal: prove the MVP works and matches the docs.
 
 Backend tests:
 
-- [ ] Registration success and duplicate email failure.
-- [ ] Login success and wrong password failure.
-- [ ] Blocked/inactive login failure.
-- [ ] Refresh-token rotation.
-- [ ] Logout revokes refresh session.
-- [ ] Customer cannot access admin endpoints.
+- [x] Registration success and duplicate email failure.
+- [x] Login success and wrong password failure.
+- [x] Blocked/inactive login failure.
+- [x] Refresh-token rotation.
+- [x] Logout revokes refresh session.
+- [x] Customer cannot access admin endpoints.
 - [ ] Product filtering by type, size, and color.
 - [ ] Admin product and variant management.
 - [ ] Cart add/update/remove.
@@ -321,9 +320,9 @@ Frontend checks:
 Documentation checks:
 
 - [ ] Swagger matches `docs/01_API_CONTRACT.md`.
-- [ ] Prisma schema matches `docs/02_DATA_MODEL.md`.
-- [ ] Feature implementation status is reflected in feature specs.
-- [ ] `docs/system_spec.md` checklists are updated as tasks complete.
+- [x] Prisma schema matches `docs/02_DATA_MODEL.md`.
+- [x] Feature implementation status is reflected in feature specs.
+- [x] `docs/system_spec.md` checklists are updated as tasks complete.
 
 ## Phase 10: Demo Preparation
 
@@ -331,7 +330,7 @@ Goal: prepare a clean interview demo path.
 
 Tasks:
 
-- [ ] Create seeded admin credentials for local demo.
+- [x] Create seeded admin credentials for local demo.
 - [ ] Create seeded customer account or demo registration path.
 - [ ] Seed at least one shirt, one pant, and one jacket.
 - [ ] Seed variants across sizes and colors.

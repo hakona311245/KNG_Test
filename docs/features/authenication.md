@@ -131,8 +131,8 @@ Recommended backend responsibilities:
 - `AuthService`: credential validation, token issuing, refresh rotation, logout handling.
 - `UsersController`: admin customer list/detail/status endpoints.
 - `UsersService`: user lookup, customer creation, customer status updates.
-- `JwtStrategy`: access-token validation.
-- `RefreshTokenService`: refresh session creation, hashing, rotation, and revocation.
+- `JwtAuthGuard`: access-token cookie validation.
+- `AuthService`: refresh session creation, hashing, rotation, and revocation.
 - `RolesGuard`: role-based route protection.
 - `CurrentUser` decorator: access authenticated user in controllers.
 
@@ -166,49 +166,49 @@ Data models used:
 
 ### Data Model
 
-- [ ] Add `UserRole` enum with `CUSTOMER` and `ADMIN`.
-- [ ] Add `UserStatus` enum with `ACTIVE`, `BLOCKED`, and `INACTIVE`.
-- [ ] Add `User` model fields from `docs/02_DATA_MODEL.md`.
-- [ ] Add unique constraint on `User.email`.
-- [ ] Add `RefreshSession` model fields from `docs/02_DATA_MODEL.md`.
-- [ ] Add relation from `User` to `RefreshSession`.
-- [ ] Add Prisma migration for auth models.
+- [x] Add `UserRole` enum with `CUSTOMER` and `ADMIN`.
+- [x] Add `UserStatus` enum with `ACTIVE`, `BLOCKED`, and `INACTIVE`.
+- [x] Add `User` model fields from `docs/02_DATA_MODEL.md`.
+- [x] Add unique constraint on `User.email`.
+- [x] Add `RefreshSession` model fields from `docs/02_DATA_MODEL.md`.
+- [x] Add relation from `User` to `RefreshSession`.
+- [x] Add Prisma migration for auth models.
 
 ### Backend Auth
 
-- [ ] Install and configure password hashing library.
-- [ ] Implement customer registration.
-- [ ] Hash passwords before storing users.
-- [ ] Implement login credential validation.
-- [ ] Prevent blocked or inactive users from logging in.
-- [ ] Generate JWT access token.
-- [ ] Generate refresh token.
-- [ ] Hash refresh token before database storage.
-- [ ] Set `access_token` HttpOnly cookie.
-- [ ] Set `refresh_token` HttpOnly cookie.
-- [ ] Implement refresh-token validation.
-- [ ] Implement refresh-token rotation.
-- [ ] Revoke old refresh session during rotation.
-- [ ] Implement logout session revocation.
-- [ ] Clear auth cookies on logout.
-- [ ] Implement current-user endpoint.
+- [x] Install and configure password hashing library.
+- [x] Implement customer registration.
+- [x] Hash passwords before storing users.
+- [x] Implement login credential validation.
+- [x] Prevent blocked or inactive users from logging in.
+- [x] Generate JWT access token.
+- [x] Generate refresh token.
+- [x] Hash refresh token before database storage.
+- [x] Set `access_token` HttpOnly cookie.
+- [x] Set `refresh_token` HttpOnly cookie.
+- [x] Implement refresh-token validation.
+- [x] Implement refresh-token rotation.
+- [x] Revoke old refresh session during rotation.
+- [x] Implement logout session revocation.
+- [x] Clear auth cookies on logout.
+- [x] Implement current-user endpoint.
 
 ### Backend Authorization
 
-- [ ] Implement JWT access-token strategy.
-- [ ] Implement role metadata decorator.
-- [ ] Implement role guard.
-- [ ] Protect admin endpoints with `ADMIN` role.
+- [x] Implement JWT access-token guard.
+- [x] Implement role metadata decorator.
+- [x] Implement role guard.
+- [x] Protect admin endpoints with `ADMIN` role.
 - [ ] Protect customer endpoints with `CUSTOMER` role where needed.
-- [ ] Ensure blocked or inactive users cannot continue privileged actions after refresh fails.
+- [x] Ensure blocked or inactive users cannot continue privileged actions after refresh fails.
 
 ### Admin Customer Management
 
-- [ ] Implement customer list endpoint.
-- [ ] Implement customer detail endpoint.
-- [ ] Implement update customer status endpoint.
-- [ ] Validate status input against `ACTIVE`, `BLOCKED`, and `INACTIVE`.
-- [ ] Ensure customer status update does not permanently delete accounts.
+- [x] Implement customer list endpoint.
+- [x] Implement customer detail endpoint.
+- [x] Implement update customer status endpoint.
+- [x] Validate status input against `ACTIVE`, `BLOCKED`, and `INACTIVE`.
+- [x] Ensure customer status update does not permanently delete accounts.
 
 ### Frontend
 
@@ -224,15 +224,15 @@ Data models used:
 
 ### Documentation and Testing
 
-- [ ] Add Swagger decorators for all auth endpoints.
-- [ ] Add Swagger decorators for admin customer endpoints.
-- [ ] Add validation DTOs for register, login, and customer status update.
-- [ ] Test register success.
-- [ ] Test duplicate email registration.
-- [ ] Test login success.
-- [ ] Test login failure with wrong password.
-- [ ] Test blocked/inactive login rejection.
-- [ ] Test refresh-token rotation.
-- [ ] Test logout clears cookies and revokes session.
-- [ ] Test admin-only endpoint rejects customer role.
-- [ ] Test current-user response excludes sensitive fields.
+- [x] Add Swagger decorators for all auth endpoints.
+- [x] Add Swagger decorators for admin customer endpoints.
+- [x] Add validation DTOs for register, login, and customer status update.
+- [x] Test register success.
+- [x] Test duplicate email registration.
+- [x] Test login success.
+- [x] Test login failure with wrong password.
+- [x] Test blocked/inactive login rejection.
+- [x] Test refresh-token rotation.
+- [x] Test logout clears cookies and revokes session.
+- [x] Test admin-only endpoint rejects customer role.
+- [x] Test current-user response excludes sensitive fields.

@@ -37,44 +37,45 @@ These URLs are planned defaults and can be adjusted during implementation.
 | Frontend | `http://localhost:5173` |
 | Backend API | `http://localhost:3000/api` |
 | Swagger | `http://localhost:3000/api/docs` |
-| PostgreSQL | `localhost:5432` |
+| PostgreSQL | `localhost:5433` |
 | Prisma Studio | `http://localhost:5555` |
 
 ## Backend Progress Checklist
 
 ### Project Setup
 
-- [ ] Scaffold NestJS backend in `backend/`.
-- [ ] Add environment configuration.
-- [ ] Add global API prefix `/api`.
-- [ ] Add request validation pipeline.
+- [x] Scaffold NestJS backend in `backend/`.
+- [x] Add environment configuration.
+- [x] Add global API prefix `/api`.
+- [x] Add request validation pipeline.
 - [ ] Add centralized error response format.
-- [ ] Add CORS configuration for frontend with credentials enabled.
+- [x] Add CORS configuration for frontend with credentials enabled.
 
 ### Prisma and PostgreSQL
 
-- [ ] Install and configure Prisma.
-- [ ] Configure `DATABASE_URL`.
-- [ ] Create Prisma schema from `docs/02_DATA_MODEL.md`.
-- [ ] Add enums: `UserRole`, `UserStatus`, `ProductType`, `Size`, `PaymentOption`, `PaymentStatus`, `OrderStatus`.
-- [ ] Add Prisma migration flow.
-- [ ] Add seed flow for initial admin account and placeholder products.
-- [ ] Verify soft delete fields where required.
+- [x] Install and configure Prisma.
+- [x] Configure `DATABASE_URL`.
+- [x] Create Prisma schema from `docs/02_DATA_MODEL.md`.
+- [x] Add enums: `UserRole`, `UserStatus`, `ProductType`, `Size`, `PaymentOption`, `PaymentStatus`, `OrderStatus`.
+- [x] Add Prisma migration flow.
+- [x] Add seed flow for initial admin account.
+- [ ] Add seed flow for placeholder products.
+- [x] Verify soft delete fields where required.
 
 ### User Service
 
-- [ ] Implement customer registration.
-- [ ] Implement email/password login.
-- [ ] Hash passwords before storage.
-- [ ] Implement JWT access token in HttpOnly cookie.
-- [ ] Implement refresh token in HttpOnly cookie.
-- [ ] Implement refresh-token rotation.
-- [ ] Store hashed refresh sessions.
-- [ ] Implement logout and refresh-session revocation.
-- [ ] Implement current-user endpoint.
-- [ ] Implement customer list/detail for admin.
-- [ ] Implement customer status update for `ACTIVE`, `BLOCKED`, and `INACTIVE`.
-- [ ] Prevent blocked or inactive users from logging in or placing orders.
+- [x] Implement customer registration.
+- [x] Implement email/password login.
+- [x] Hash passwords before storage.
+- [x] Implement JWT access token in HttpOnly cookie.
+- [x] Implement refresh token in HttpOnly cookie.
+- [x] Implement refresh-token rotation.
+- [x] Store hashed refresh sessions.
+- [x] Implement logout and refresh-session revocation.
+- [x] Implement current-user endpoint.
+- [x] Implement customer list/detail for admin.
+- [x] Implement customer status update for `ACTIVE`, `BLOCKED`, and `INACTIVE`.
+- [x] Prevent blocked or inactive users from logging in or refreshing auth sessions.
 
 ### Product Service
 
@@ -113,11 +114,11 @@ These URLs are planned defaults and can be adjusted during implementation.
 
 ### API Documentation and Tests
 
-- [ ] Add Swagger setup at `/api/docs`.
+- [x] Add Swagger setup at `/api/docs`.
 - [ ] Add Swagger decorators for all MVP endpoints.
 - [ ] Keep Swagger behavior aligned with `docs/01_API_CONTRACT.md`.
-- [ ] Add DTO validation for request payloads.
-- [ ] Add auth and role guard tests.
+- [x] Add DTO validation for auth and admin customer request payloads.
+- [x] Add auth and role guard tests.
 - [ ] Add service tests for stock and checkout transaction rules.
 - [ ] Add API tests for customer and admin flows.
 
@@ -183,28 +184,29 @@ These URLs are planned defaults and can be adjusted during implementation.
 
 ### Docker Files
 
-- [ ] Add backend Dockerfile.
+- [x] Add backend Dockerfile.
 - [ ] Add frontend Dockerfile.
-- [ ] Add root `docker-compose.yml`.
-- [ ] Add PostgreSQL service.
-- [ ] Add backend service.
+- [x] Add root `docker-compose.yml`.
+- [x] Add PostgreSQL service.
+- [x] Add backend service.
 - [ ] Add frontend service.
-- [ ] Add persistent PostgreSQL volume.
+- [x] Add persistent PostgreSQL volume.
 - [ ] Add local network configuration if needed.
 
 ### Environment
 
-- [ ] Add backend `.env.example`.
+- [x] Add backend `.env.example`.
 - [ ] Add frontend `.env.example`.
-- [ ] Add Docker Compose environment variables.
-- [ ] Document local database credentials.
-- [ ] Document JWT and cookie settings.
+- [x] Add Docker Compose environment variables.
+- [x] Document local database credentials.
+- [x] Document JWT and cookie settings.
 
 ### Database Flow
 
-- [ ] Run migrations from backend container or local backend process.
-- [ ] Run seed command for initial admin and placeholder data.
-- [ ] Verify Prisma Studio can inspect local database.
+- [x] Run migrations from backend container or local backend process.
+- [x] Run seed command for initial admin account.
+- [ ] Run seed command for placeholder product data.
+- [x] Verify Prisma Studio can inspect local database.
 
 ## Environment Variables
 
@@ -213,7 +215,7 @@ These URLs are planned defaults and can be adjusted during implementation.
 Planned variables:
 
 ```env
-DATABASE_URL="postgresql://kng_user:kng_password@localhost:5432/kng_fashion?schema=public"
+DATABASE_URL="postgresql://kng_user:kng_password@localhost:5433/kng_fashion?schema=public"
 JWT_ACCESS_SECRET="replace-with-access-secret"
 JWT_REFRESH_SECRET="replace-with-refresh-secret"
 JWT_ACCESS_EXPIRES_IN="15m"
@@ -240,7 +242,7 @@ Planned variables:
 POSTGRES_DB="kng_fashion"
 POSTGRES_USER="kng_user"
 POSTGRES_PASSWORD="kng_password"
-POSTGRES_PORT="5432"
+POSTGRES_PORT="5433"
 ```
 
 ## Command Reference
@@ -257,9 +259,9 @@ npm run start:dev
 npm run build
 npm run test
 npm run test:e2e
+npm run db:seed
 npx prisma generate
 npx prisma migrate dev
-npx prisma db seed
 npx prisma studio
 ```
 
@@ -282,6 +284,7 @@ Run from project root.
 ```powershell
 docker compose up -d
 docker compose up --build
+docker compose run --rm backend npm run db:seed
 docker compose logs -f
 docker compose logs -f backend
 docker compose logs -f frontend
@@ -296,7 +299,7 @@ Run from project root after services exist.
 
 ```powershell
 docker compose exec backend npx prisma migrate dev
-docker compose exec backend npx prisma db seed
+docker compose run --rm backend npm run db:seed
 docker compose exec backend npx prisma studio
 ```
 
@@ -314,10 +317,10 @@ docker compose exec backend npx prisma studio
 ### Backend Done
 
 - [ ] All MVP endpoints from `docs/01_API_CONTRACT.md` are implemented.
-- [ ] Swagger is available at `/api/docs`.
-- [ ] Prisma schema matches `docs/02_DATA_MODEL.md`.
-- [ ] Auth uses HttpOnly cookies and refresh-token rotation.
-- [ ] Customer and admin authorization rules are enforced.
+- [x] Swagger is available at `/api/docs`.
+- [x] Prisma schema matches `docs/02_DATA_MODEL.md`.
+- [x] Auth uses HttpOnly cookies and refresh-token rotation.
+- [x] Customer and admin authorization rules are enforced for implemented User service endpoints.
 - [ ] Checkout creates orders transactionally and prevents negative stock.
 - [ ] Backend tests cover auth, product, cart, checkout, and order rules.
 
@@ -332,7 +335,7 @@ docker compose exec backend npx prisma studio
 ### Docker Done
 
 - [ ] `docker compose up --build` starts PostgreSQL, backend, and frontend.
-- [ ] Backend connects to PostgreSQL from Docker.
+- [x] Backend connects to PostgreSQL from Docker.
 - [ ] Migrations and seed can run locally.
 - [ ] Swagger and frontend are accessible from the documented URLs.
 - [ ] The full MVP demo flow works from a fresh local setup.
