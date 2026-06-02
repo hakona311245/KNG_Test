@@ -1,0 +1,120 @@
+erDiagram
+    USER_ACCOUNT {
+        string id PK
+        string email UK
+        string fullName
+        string passwordHash
+        string phoneNumber
+        string role
+        string status
+        datetime createdAt
+        datetime updatedAt
+        datetime deletedAt
+    }+
+
+    REFRESH_SESSION {
+        string id PK
+        string userId FK
+        string refreshTokenHash
+        datetime expiresAt
+        datetime revokedAt
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    PRODUCT {
+        string id PK
+        string name
+        string description
+        string type
+        string material
+        decimal price
+        string imageUrl
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+        datetime deletedAt
+    }
+
+    PRODUCT_VARIANT {
+        string id PK
+        string productId FK
+        string size
+        string color
+        int stock
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+        datetime deletedAt
+    }
+
+    CART {
+        string id PK
+        string userId FK
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    CART_ITEM {
+        string id PK
+        string cartId FK
+        string variantId FK
+        int quantity
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    CUSTOMER_ORDER {
+        string id PK
+        string userId FK
+        string status
+        string paymentOption
+        string paymentStatus
+        string shippingName
+        string phone
+        string address
+        string city
+        string note
+        decimal total
+        datetime createdAt
+        datetime updatedAt
+        datetime deletedAt
+    }
+
+    ORDER_ITEM {
+        string id PK
+        string orderId FK
+        string productId FK
+        string variantId FK
+        string productName
+        string size
+        string color
+        decimal unitPrice
+        int quantity
+        decimal subtotal
+        datetime createdAt
+    }
+
+    ORDER_CANCELLATION_REQUEST {
+        string id PK
+        string orderId FK
+        string customerId FK
+        string reason
+        string adminNote
+        datetime createdAt
+        datetime resolvedAt
+    }
+
+    USER_ACCOUNT ||--o{ REFRESH_SESSION : has
+    USER_ACCOUNT ||--|| CART : owns
+    USER_ACCOUNT ||--o{ CUSTOMER_ORDER : places
+    USER_ACCOUNT ||--o{ ORDER_CANCELLATION_REQUEST : submits
+
+    PRODUCT ||--o{ PRODUCT_VARIANT : has
+    PRODUCT ||--o{ ORDER_ITEM : snapshotted_in
+    PRODUCT_VARIANT ||--o{ CART_ITEM : selected_as
+    PRODUCT_VARIANT ||--o{ ORDER_ITEM : snapshotted_in
+
+    CART ||--o{ CART_ITEM : contains
+    CUSTOMER_ORDER ||--o{ ORDER_ITEM : contains
+    CUSTOMER_ORDER ||--o| ORDER_CANCELLATION_REQUEST : may_have
