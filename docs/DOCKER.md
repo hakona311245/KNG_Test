@@ -1,8 +1,21 @@
 # Docker Setup
 
-This project uses Docker Compose to run the local PostgreSQL database and Adminer database UI.
+This project uses Docker Compose to run the local NestJS backend API, PostgreSQL database, and Adminer database UI.
 
 ## Services
+
+### `backend`
+
+Runs the NestJS backend API in development mode.
+
+- Build context: `backend/`
+- Dockerfile: `backend/Dockerfile`
+- Container: `kng-fashion-backend`
+- Port: `3000`
+- URL: `http://localhost:3000`
+- API base URL: `http://localhost:3000/api`
+
+The backend waits for PostgreSQL to become healthy before starting.
 
 ### `postgres`
 
@@ -12,8 +25,8 @@ Runs PostgreSQL for the backend API.
 - Container: `kng-fashion-postgres`
 - Port: `5432`
 - Database: `kng_fashion`
-- User: `kng_user`
-- Password: `kng_password`
+- User: look into secret
+- Password: look into secret
 - Volume: `kng_postgres_data`
 
 The volume keeps database data after the container stops.
@@ -31,28 +44,42 @@ Adminer waits for PostgreSQL to become healthy before starting.
 
 ## Backend Database URL
 
-Use this in `backend/.env`:
+Use this in `backend/.env` when running the backend directly on your machine:
 
 ```env
-DATABASE_URL="postgresql://"admin_username":"admin_password"@localhost:5432/kng_fashion?schema=public"
+DATABASE_URL="postgresql://admin_username:admin_password@localhost:5432/kng_fashion?schema=public"
 ```
+
+Docker Compose passes a container-safe URL to the backend service:
+
+```env
+DATABASE_URL="postgresql://admin_username:admin_password@postgres:5432/kng_fashion?schema=public"
+```
+
+Use the username and password from `docs/secret.md`.
 
 ## Adminer Login
 
 ```text
 System: PostgreSQL
 Server: postgres
-Username: kng_user
-Password: kng_password
+Username: look into secret
+Password: look into secret
 Database: kng_fashion
 ```
 
 ## Commands
 
-Start PostgreSQL and Adminer:
+Start backend, PostgreSQL, and Adminer:
 
 ```powershell
 docker compose up -d
+```
+
+Start backend and rebuild its image:
+
+```powershell
+docker compose up --build backend
 ```
 
 Start only PostgreSQL:
@@ -71,6 +98,12 @@ View PostgreSQL logs:
 
 ```powershell
 docker compose logs -f postgres
+```
+
+View backend logs:
+
+```powershell
+docker compose logs -f backend
 ```
 
 Stop services:
