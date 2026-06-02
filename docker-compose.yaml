@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kng-fashion-postgres
+    restart: unless-stopped
+    shm_size: 128mb
+    environment:
+      POSTGRES_DB: kng_fashion
+      POSTGRES_USER: kng_user
+      POSTGRES_PASSWORD: kng_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - kng_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kng_user -d kng_fashion"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: kng-fashion-adminer
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+volumes:
+  kng_postgres_data:

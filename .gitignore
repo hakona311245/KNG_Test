@@ -3,3 +3,5 @@ backend/dist/
 backend/.env
 
 /generated/prisma
+
+docs/secret.md
