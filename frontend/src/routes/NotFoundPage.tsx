@@ -1,5 +1,5 @@
 import { PrimaryLink } from '../components/links'
-import { PageFrame } from './ProductsPage'
+import { PageFrame } from '../components/PageFrame'
 
 export function NotFoundPage() {
   return (

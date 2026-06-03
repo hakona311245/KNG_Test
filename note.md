@@ -33,3 +33,39 @@
 - Frontend env example exists at `frontend/.env.example`.
 - Initial routes exist for home, products, product detail, cart, checkout, login, register, and admin.
 - Checks passed from `frontend/`: `npm run build`, `npm run lint`.
+
+## Frontend API integration foundation
+- Added typed API wrappers for auth, products, cart, orders, and admin endpoints.
+- Added `AuthProvider` and `useAuth` for current-user bootstrap from `GET /api/auth/me`.
+- Added customer and admin route guards for protected placeholder routes.
+- Browser routing now wraps the app in `frontend/src/main.tsx`.
+- Auth state stores only the user object; JWTs remain in HttpOnly cookies.
+
+## Homepage first viewport
+- Home page now follows the provided Figma references for the first viewport: editorial header, retractable `SHIRT`/`PANTS`/`JACKET` menu, search bar, `NEW COLLECTION`, shop CTA, product panels, and mobile product strip.
+- Home assets use `frontend/public/noisy_background.png`, `frontend/public/logo/KNG_Logo_transparent.png`, `frontend/public/product/whitepant.png`, and a temporary cropped `frontend/public/product/blackshirt.png`.
+- The reusable storefront header lives in `frontend/src/components/SiteHeader.tsx` and owns the hamburger category menu.
+- Product API integration, footer, login/register forms, and downstream homepage sections are still deferred.
+
+## Frontend next-session handoff
+- Current frontend design sources: `docs/designs/global_design_system.md`, `docs/designs/home_page_design.md`, and `docs/figma/*`.
+- `SiteHeader` is reusable and should be used for customer storefront pages. Hamburger toggles the category menu; closed state is hidden, open state pushes page content down. Menu links map to `/products?type=SHIRT`, `/products?type=PANT`, and `/products?type=JACKET`.
+- `HomePage` is static for now. It uses provided public assets and does not yet fetch product data.
+- Latest homepage visual fix: desktop product panels were pushed right by widening the left text column in `frontend/src/routes/HomePage.tsx`; this prevents overlap with `NEW COLLECTION`.
+- QA used Playwright fallback because Codex in-app Browser still returned no registered `iab` browsers. Verified `npm run build`, `npm run lint`, hamburger menu interaction, and desktop/mobile screenshots.
+- Expected console noise during unauthenticated frontend QA: `/api/auth/me` returns `401` until login is implemented.
+- Recommended next frontend slice: build `/products` page using `Products.png`, `product-mobile.png`, and `product-filter.png`, reusing `SiteHeader`, `SearchBar` styling, product cards, and category/filter chips.
+- Do not start login/register yet unless requested; user asked to hold auth UI for later.
+
+## Products page slice
+- `/products` now fetches real catalog data through `productsApi.listProducts()` and uses URL query params for `type`, `size`, and `page`.
+- Category chips map `SHIRT`, `PANTS`, and `JACKET` to backend product types; `PANTS` uses the backend value `PANT`.
+- Size filtering uses backend-supported sizes only: `S`, `M`, `L`, `XL`.
+- The search bar is visual-only for now because the backend product list endpoint does not support search yet.
+- Product cards use real backend names, material, prices, colors, and thumbnail URLs, with local fallback images when a product has no thumbnail.
+- Next product work: build `/products/:id` detail page and wire variant selection before cart add.
+
+## CORS local dev note
+- Backend CORS now supports `FRONTEND_URLS` as a comma-separated allowlist while keeping `FRONTEND_URL` for backward compatibility.
+- Local backend `.env` allows both `http://localhost:5173` and `http://localhost:5174`, because Vite may move to `5174` when `5173` is already in use.
+- Restart the backend after changing these env values; CORS headers are set at backend startup.

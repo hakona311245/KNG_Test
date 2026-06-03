@@ -134,14 +134,15 @@ Backend tasks:
 
 Frontend tasks:
 
-- [ ] Configure Axios with `withCredentials: true`.
+- [x] Configure Axios with `withCredentials: true`.
+- [x] Add typed frontend API modules for auth, products, cart, orders, and admin.
 - [ ] Add register page.
 - [ ] Add login page.
-- [ ] Add logout action.
-- [ ] Add current-user bootstrap on app load.
-- [ ] Add customer route guard.
-- [ ] Add admin route guard.
-- [ ] Confirm tokens are not stored in `localStorage`.
+- [x] Add logout action.
+- [x] Add current-user bootstrap on app load.
+- [x] Add customer route guard.
+- [x] Add admin route guard.
+- [x] Confirm tokens are not stored in `localStorage`.
 
 Done when:
 
@@ -180,8 +181,9 @@ Backend tasks:
 
 Frontend tasks:
 
-- [ ] Build product listing page.
-- [ ] Add filters for type, size, and color.
+- [x] Build product listing page.
+- [x] Add filters for type and size.
+- [ ] Add color filter.
 - [ ] Build product detail page.
 - [ ] Add size/color variant selector.
 - [ ] Build admin product list.

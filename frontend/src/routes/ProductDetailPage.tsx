@@ -1,4 +1,4 @@
-import { PageFrame } from './ProductsPage'
+import { PageFrame } from '../components/PageFrame'
 
 export function ProductDetailPage() {
   return (

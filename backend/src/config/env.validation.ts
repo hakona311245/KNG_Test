@@ -9,6 +9,28 @@ export const envValidationSchema = Joi.object({
   COOKIE_SECURE: Joi.boolean().truthy('true').falsy('false').default(false),
   COOKIE_SAME_SITE: Joi.string().valid('lax', 'strict', 'none').default('lax'),
   FRONTEND_URL: Joi.string().uri().default('http://localhost:5173'),
+  FRONTEND_URLS: Joi.string()
+    .custom((value, helpers) => {
+      const origins = value
+        .split(',')
+        .map((origin: string) => origin.trim())
+        .filter(Boolean);
+
+      if (!origins.length) {
+        return helpers.error('string.empty');
+      }
+
+      for (const origin of origins) {
+        const { error } = Joi.string().uri().validate(origin);
+
+        if (error) {
+          return helpers.error('string.uri', { value: origin });
+        }
+      }
+
+      return value;
+    })
+    .optional(),
   PORT: Joi.number().port().default(3000),
   ADMIN_EMAIL: Joi.string().email({ tlds: { allow: false } }).optional(),
   ADMIN_PASSWORD: Joi.string().min(8).optional(),

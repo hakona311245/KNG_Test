@@ -137,16 +137,17 @@ These URLs are planned defaults and can be adjusted during implementation.
 - [ ] Add separate admin layout inside the same app.
 - [x] Configure Axios API client with `withCredentials: true`.
 - [x] Add environment variable for API base URL.
+- [x] Add typed frontend API modules for auth, products, cart, orders, and admin.
 
 ### Authentication UI
 
 - [ ] Build register page.
 - [ ] Build login page.
-- [ ] Build logout action.
-- [ ] Load current user on app startup.
-- [ ] Add authenticated customer route guard.
-- [ ] Add admin route guard.
-- [ ] Avoid token storage in `localStorage`.
+- [x] Build logout action.
+- [x] Load current user on app startup.
+- [x] Add authenticated customer route guard.
+- [x] Add admin route guard.
+- [x] Avoid token storage in `localStorage`.
 - [ ] Handle blocked/inactive account errors.
 
 ### Customer UI
@@ -227,6 +228,7 @@ JWT_REFRESH_EXPIRES_IN="7d"
 COOKIE_SECURE="false"
 COOKIE_SAME_SITE="lax"
 FRONTEND_URL="http://localhost:5173"
+FRONTEND_URLS="http://localhost:5173,http://localhost:5174"
 PORT="3000"
 CLOUDINARY_URL="cloudinary://replace-with-api-key:replace-with-api-secret@replace-with-cloud-name"
 CLOUDINARY_FOLDER="kng-fashion/products"

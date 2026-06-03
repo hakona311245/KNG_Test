@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppShell } from './app/AppShell'
+import { AdminRouteGuard, CustomerRouteGuard } from './auth/RouteGuards'
 import { AdminDashboardPage } from './routes/AdminDashboardPage'
 import { CartPage } from './routes/CartPage'
 import { CheckoutPage } from './routes/CheckoutPage'
@@ -17,11 +18,15 @@ export function App() {
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/:id" element={<ProductDetailPage />} />
-        <Route path="cart" element={<CartPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
+        <Route element={<CustomerRouteGuard />}>
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+        </Route>
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-        <Route path="admin" element={<AdminDashboardPage />} />
+        <Route element={<AdminRouteGuard />}>
+          <Route path="admin" element={<AdminDashboardPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

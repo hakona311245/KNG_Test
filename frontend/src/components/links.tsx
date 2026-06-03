@@ -30,8 +30,8 @@ export function HeaderNavLink({
       to={to}
       className={({ isActive }) =>
         [
-          'text-sm font-medium transition',
-          isActive ? 'text-zinc-950' : 'text-zinc-500 hover:text-zinc-950',
+          'text-sm font-semibold tracking-[0.18em] transition sm:text-base',
+          isActive ? 'text-[#111111]' : 'text-[#111111]/75 hover:text-[#111111]',
         ].join(' ')
       }
     >
