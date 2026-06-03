@@ -1,11 +1,6 @@
 import { ConflictException } from '@nestjs/common';
-import type {
-  User,
-} from '../../generated/prisma/client';
-import {
-  UserRole,
-  UserStatus,
-} from '../../generated/prisma/client';
+import type { User } from '../../generated/prisma/client';
+import { UserRole, UserStatus } from '../../generated/prisma/client';
 import { UsersService } from './users.service';
 
 jest.mock('../../generated/prisma/client', () => ({
