@@ -79,18 +79,18 @@ These URLs are planned defaults and can be adjusted during implementation.
 
 ### Product Service
 
-- [ ] Implement customer product listing.
-- [ ] Implement product detail with variants.
-- [ ] Implement product options endpoint for fixed product types and sizes.
-- [ ] Implement admin product list/detail.
-- [ ] Implement admin product create/update.
-- [ ] Implement product soft delete.
-- [ ] Implement variant list/create/update.
-- [ ] Implement variant soft delete.
-- [ ] Enforce fixed sizes: `S`, `M`, `L`, `XL`.
-- [ ] Support free-text variant colors.
-- [ ] Enforce unique active variant by product, size, and color.
-- [ ] Track stock at variant level.
+- [x] Implement customer product listing.
+- [x] Implement product detail with variants.
+- [x] Implement product options endpoint for fixed product types and sizes.
+- [x] Implement admin product list/detail.
+- [x] Implement admin product create/update.
+- [x] Implement product soft delete.
+- [x] Implement variant list/create/update.
+- [x] Implement variant soft delete.
+- [x] Enforce fixed sizes: `S`, `M`, `L`, `XL`.
+- [x] Support free-text variant colors.
+- [x] Enforce unique active variant by product, size, and color.
+- [x] Track stock at variant level.
 
 ### CartAndOrder Service
 

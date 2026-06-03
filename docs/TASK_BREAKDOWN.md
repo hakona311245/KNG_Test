@@ -156,23 +156,23 @@ Goal: implement customer catalog and admin product management.
 
 Backend tasks:
 
-- [ ] Implement `GET /api/products`.
-- [ ] Implement `GET /api/products/:id`.
-- [ ] Implement `GET /api/products/options`.
-- [ ] Implement `GET /api/admin/products`.
-- [ ] Implement `POST /api/admin/products`.
-- [ ] Implement `GET /api/admin/products/:id`.
-- [ ] Implement `PATCH /api/admin/products/:id`.
-- [ ] Implement `DELETE /api/admin/products/:id` as soft delete.
-- [ ] Implement `GET /api/admin/products/:productId/variants`.
-- [ ] Implement `POST /api/admin/products/:productId/variants`.
-- [ ] Implement `PATCH /api/admin/variants/:variantId`.
-- [ ] Implement `DELETE /api/admin/variants/:variantId` as soft delete.
-- [ ] Enforce fixed product types: `SHIRT`, `PANT`, `JACKET`.
-- [ ] Enforce fixed sizes: `S`, `M`, `L`, `XL`.
-- [ ] Support free-text colors.
-- [ ] Hide inactive or deleted products from customer catalog.
-- [ ] Add Swagger decorators for Product service endpoints.
+- [x] Implement `GET /api/products`.
+- [x] Implement `GET /api/products/:id`.
+- [x] Implement `GET /api/products/options`.
+- [x] Implement `GET /api/admin/products`.
+- [x] Implement `POST /api/admin/products`.
+- [x] Implement `GET /api/admin/products/:id`.
+- [x] Implement `PATCH /api/admin/products/:id`.
+- [x] Implement `DELETE /api/admin/products/:id` as soft delete.
+- [x] Implement `GET /api/admin/products/:productId/variants`.
+- [x] Implement `POST /api/admin/products/:productId/variants`.
+- [x] Implement `PATCH /api/admin/variants/:variantId`.
+- [x] Implement `DELETE /api/admin/variants/:variantId` as soft delete.
+- [x] Enforce fixed product types: `SHIRT`, `PANT`, `JACKET`.
+- [x] Enforce fixed sizes: `S`, `M`, `L`, `XL`.
+- [x] Support free-text colors.
+- [x] Hide inactive or deleted products from customer catalog.
+- [x] Add Swagger decorators for Product service endpoints.
 
 Frontend tasks:
 
@@ -300,8 +300,8 @@ Backend tests:
 - [x] Refresh-token rotation.
 - [x] Logout revokes refresh session.
 - [x] Customer cannot access admin endpoints.
-- [ ] Product filtering by type, size, and color.
-- [ ] Admin product and variant management.
+- [x] Product filtering by type, size, and color.
+- [x] Admin product and variant management.
 - [ ] Cart add/update/remove.
 - [ ] Checkout validates stock.
 - [ ] Checkout creates order and reduces stock transactionally.
