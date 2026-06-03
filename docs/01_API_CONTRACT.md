@@ -182,6 +182,16 @@ refresh_token=...; HttpOnly; Path=/api/auth; SameSite=Lax
 
 Blocked or inactive users must receive an authentication error and no auth cookies.
 
+Auth error messages used by the current backend:
+
+- Missing access cookie: `Authentication is required.`
+- Invalid or expired access token: `Invalid or expired access token.`
+- Missing refresh cookie: `Refresh token is required.`
+- Invalid or expired refresh token: `Invalid or expired refresh token.`
+- Invalid refresh session: `Refresh session is invalid.`
+- Blocked or inactive account: `Account is not active.`
+- Non-admin user on admin endpoint: `You do not have permission to access this resource.`
+
 ### Refresh Token
 
 ```http
@@ -196,6 +206,24 @@ Behavior:
 - Stores only the hashed refresh token/session value in database.
 - Issues new access and refresh cookies.
 
+Response:
+
+```json
+{
+  "data": {
+    "user": {
+      "id": "user-id",
+      "email": "customer@example.com",
+      "fullName": "Nguyen Van A",
+      "phoneNumber": "0900000000",
+      "role": "CUSTOMER",
+      "status": "ACTIVE"
+    }
+  },
+  "message": "Session refreshed successfully"
+}
+```
+
 ### Logout
 
 ```http
@@ -206,6 +234,15 @@ Behavior:
 
 - Invalidates the current refresh session.
 - Clears auth cookies.
+
+Response:
+
+```json
+{
+  "data": null,
+  "message": "Logged out successfully"
+}
+```
 
 ### Current User
 
@@ -242,8 +279,31 @@ Auth: `ADMIN`
 Query parameters:
 
 - `status`: `ACTIVE`, `BLOCKED`, `INACTIVE`
-- `page`
-- `limit`
+- `page`: defaults to `1`
+- `limit`: defaults to `20`
+
+Response:
+
+```json
+{
+  "data": {
+    "items": [
+      {
+        "id": "user-id",
+        "email": "customer@example.com",
+        "fullName": "Nguyen Van A",
+        "phoneNumber": "0900000000",
+        "role": "CUSTOMER",
+        "status": "ACTIVE"
+      }
+    ],
+    "page": 1,
+    "limit": 20,
+    "total": 1
+  },
+  "message": "Customers retrieved successfully"
+}
+```
 
 ### Get Customer Detail
 
@@ -252,6 +312,22 @@ GET /api/admin/customers/:id
 ```
 
 Auth: `ADMIN`
+
+Response:
+
+```json
+{
+  "data": {
+    "id": "user-id",
+    "email": "customer@example.com",
+    "fullName": "Nguyen Van A",
+    "phoneNumber": "0900000000",
+    "role": "CUSTOMER",
+    "status": "ACTIVE"
+  },
+  "message": "Customer retrieved successfully"
+}
+```
 
 ### Update Customer Status
 
@@ -270,6 +346,22 @@ Request:
 ```
 
 Customers are not permanently deleted in the MVP.
+
+Response:
+
+```json
+{
+  "data": {
+    "id": "user-id",
+    "email": "customer@example.com",
+    "fullName": "Nguyen Van A",
+    "phoneNumber": "0900000000",
+    "role": "CUSTOMER",
+    "status": "BLOCKED"
+  },
+  "message": "Customer status updated successfully"
+}
+```
 
 ## Product Service
 
