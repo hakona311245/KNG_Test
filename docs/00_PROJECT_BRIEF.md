@@ -65,11 +65,11 @@ Products should support:
 - Type: Shirt, Pant, Jacket
 - Material
 - Price
-- Image URL
+- Product and variant image URLs
 - Active or soft-deleted status
 - Variants with size, color, and stock
 
-Product images are stored as URL strings. During development, placeholder image URLs can be used and replaced later.
+Product and variant images are stored as URL strings. During development, placeholder image URLs can be used and replaced later.
 
 ## Authentication and Authorization
 

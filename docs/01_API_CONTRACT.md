@@ -365,7 +365,7 @@ Response:
 
 ## Product Service
 
-The Product service owns product catalog reads, admin product management, fixed product type options, fixed size options, free-text variant colors, variant stock, and product soft delete.
+The Product service owns product catalog reads, admin product management, fixed product type options, fixed size options, free-text variant colors, product and variant images, variant stock, and product soft delete.
 
 Total MVP endpoints: 12
 
@@ -412,7 +412,7 @@ Response:
         "type": "SHIRT",
         "material": "Cotton",
         "price": 250000,
-        "imageUrl": "https://example.com/placeholder.jpg",
+        "thumbnailUrl": "https://example.com/product-front.jpg",
         "availableColors": ["Black", "White"],
         "availableSizes": ["S", "M", "L"],
         "isActive": true
@@ -445,7 +445,16 @@ Response:
     "type": "SHIRT",
     "material": "Cotton",
     "price": 250000,
-    "imageUrl": "https://example.com/placeholder.jpg",
+    "thumbnailUrl": "https://example.com/product-front.jpg",
+    "images": [
+      {
+        "id": "image-id",
+        "url": "https://example.com/product-front.jpg",
+        "altText": "Front view",
+        "sortOrder": 1,
+        "isPrimary": true
+      }
+    ],
     "isActive": true,
     "variants": [
       {
@@ -453,7 +462,16 @@ Response:
         "size": "M",
         "color": "Black",
         "stock": 10,
-        "isActive": true
+        "isActive": true,
+        "images": [
+          {
+            "id": "variant-image-id",
+            "url": "https://example.com/product-black-m.jpg",
+            "altText": "Black size M",
+            "sortOrder": 1,
+            "isPrimary": true
+          }
+        ]
       }
     ]
   },
@@ -462,6 +480,8 @@ Response:
 ```
 
 Product price is stored on the product. All variants of the same product use the same product price.
+
+Product images are stored as URL strings. Product detail returns product-level images and variant-level images. `thumbnailUrl` is selected from the primary product image, falling back to the first product image by `sortOrder`.
 
 ### Get Product Options
 
@@ -515,9 +535,18 @@ Request:
   "type": "SHIRT",
   "material": "Cotton",
   "price": 250000,
-  "imageUrl": "https://example.com/placeholder.jpg"
+  "images": [
+    {
+      "url": "https://example.com/product-front.jpg",
+      "altText": "Front view",
+      "sortOrder": 1,
+      "isPrimary": true
+    }
+  ]
 }
 ```
+
+Product create requires at least one product-level image.
 
 ### Get Admin Product Detail
 
@@ -544,10 +573,19 @@ Request:
   "type": "SHIRT",
   "material": "Cotton",
   "price": 260000,
-  "imageUrl": "https://example.com/placeholder.jpg",
+  "images": [
+    {
+      "url": "https://example.com/product-front-updated.jpg",
+      "altText": "Updated front view",
+      "sortOrder": 1,
+      "isPrimary": true
+    }
+  ],
   "isActive": true
 }
 ```
+
+If `images` is provided during update, it replaces the product's current non-deleted product-level images.
 
 ### Soft Delete Product
 
@@ -581,7 +619,15 @@ Request:
 {
   "size": "M",
   "color": "Black",
-  "stock": 10
+  "stock": 10,
+  "images": [
+    {
+      "url": "https://example.com/product-black-m.jpg",
+      "altText": "Black size M",
+      "sortOrder": 1,
+      "isPrimary": true
+    }
+  ]
 }
 ```
 
@@ -590,6 +636,7 @@ Rules:
 - `size` must be one of `S`, `M`, `L`, `XL`.
 - `color` is free text.
 - The same product cannot have duplicate active variants with the same size and color.
+- Variant images are optional.
 
 ### Update Product Variant
 
@@ -606,9 +653,19 @@ Request:
   "size": "L",
   "color": "Black",
   "stock": 12,
+  "images": [
+    {
+      "url": "https://example.com/product-black-l.jpg",
+      "altText": "Black size L",
+      "sortOrder": 1,
+      "isPrimary": true
+    }
+  ],
   "isActive": true
 }
 ```
+
+If `images` is provided during update, it replaces the variant's current non-deleted variant-level images.
 
 ### Soft Delete Product Variant
 

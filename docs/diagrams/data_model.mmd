@@ -29,7 +29,6 @@ erDiagram
         string type
         string material
         decimal price
-        string imageUrl
         boolean isActive
         datetime createdAt
         datetime updatedAt
@@ -43,6 +42,19 @@ erDiagram
         string color
         int stock
         boolean isActive
+        datetime createdAt
+        datetime updatedAt
+        datetime deletedAt
+    }
+
+    PRODUCT_IMAGE {
+        string id PK
+        string productId FK
+        string variantId FK
+        string url
+        string altText
+        int sortOrder
+        boolean isPrimary
         datetime createdAt
         datetime updatedAt
         datetime deletedAt
@@ -111,7 +123,9 @@ erDiagram
     USER_ACCOUNT ||--o{ ORDER_CANCELLATION_REQUEST : submits
 
     PRODUCT ||--o{ PRODUCT_VARIANT : has
+    PRODUCT ||--o{ PRODUCT_IMAGE : has
     PRODUCT ||--o{ ORDER_ITEM : snapshotted_in
+    PRODUCT_VARIANT ||--o{ PRODUCT_IMAGE : may_have
     PRODUCT_VARIANT ||--o{ CART_ITEM : selected_as
     PRODUCT_VARIANT ||--o{ ORDER_ITEM : snapshotted_in
 

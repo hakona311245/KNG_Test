@@ -10,6 +10,7 @@ Owns:
 
 - Product
 - ProductVariant
+- ProductImage
 
 Fixed enum-like values:
 
@@ -151,7 +152,6 @@ Fields:
 - `type`: `SHIRT`, `PANT`, or `JACKET`
 - `material`
 - `price`
-- `imageUrl`
 - `isActive`
 - `createdAt`
 - `updatedAt`
@@ -161,12 +161,15 @@ Rules:
 
 - Product price is stored on Product.
 - All variants of the same product use the same product price.
+- Product has multiple product-level images through `ProductImage`.
+- Product create requires at least one product-level image.
 - Products are soft deleted only.
 - Customer catalog APIs return only active, non-deleted products.
 
 Relationships:
 
 - Product has many product variants.
+- Product has many product images.
 - Product can appear in many order item snapshots.
 
 ## ProductVariant
@@ -196,8 +199,46 @@ Rules:
 Relationships:
 
 - ProductVariant belongs to Product.
+- ProductVariant can have many variant-specific product images.
 - ProductVariant can be referenced by cart items.
 - ProductVariant can appear in order item snapshots.
+
+## ProductImage
+
+Represents product-level and variant-level image URLs.
+
+Fields:
+
+- `id`
+- `productId`
+- `variantId`
+- `url`
+- `altText`
+- `sortOrder`
+- `isPrimary`
+- `createdAt`
+- `updatedAt`
+- `deletedAt`
+
+Rules:
+
+- Images are URL strings only; file upload/storage is out of scope for MVP.
+- `productId` is required.
+- `variantId` is nullable.
+- `variantId = null` means the image belongs to the product in general.
+- `variantId != null` means the image belongs to a specific product variant.
+- If `variantId` is set, the variant must belong to the same `productId`.
+- Product images are soft deleted only.
+- Product create requires at least one product-level image.
+- Variant images are optional.
+- `sortOrder` controls image display order.
+- `isPrimary` marks the preferred thumbnail image.
+- `thumbnailUrl` is selected from the primary product image, falling back to the first product image by `sortOrder`.
+
+Relationships:
+
+- ProductImage belongs to Product.
+- ProductImage optionally belongs to ProductVariant.
 
 ## Cart
 
@@ -339,6 +380,8 @@ Relationships:
 - User 1-N Order
 - User 1-N RefreshSession
 - Product 1-N ProductVariant
+- Product 1-N ProductImage
+- ProductVariant 0-N ProductImage
 - Cart 1-N CartItem
 - ProductVariant 1-N CartItem
 - Order 1-N OrderItem
@@ -350,6 +393,8 @@ Relationships:
 - Use `deletedAt` for soft delete where records should disappear from active views.
 - Use account `status` to block or deactivate customers.
 - Product price changes do not affect existing orders because order items store price snapshots.
+- Product and variant images are not snapshotted in order items for MVP.
+- If a product image references a variant, the variant must belong to the same product.
 - Variant stock must never become negative.
 - Checkout must validate stock before creating the order.
 - Checkout should update stock and create order data in one transaction.

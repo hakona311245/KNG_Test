@@ -56,7 +56,7 @@ Feature specs:
 
 ## Product Service
 
-The Product service owns the customer-facing catalog, admin product management, fixed product type options, fixed size options, free-text variant colors, stock at variant level, and soft delete for products and variants.
+The Product service owns the customer-facing catalog, admin product management, fixed product type options, fixed size options, free-text variant colors, product and variant image URLs, stock at variant level, and soft delete for products, variants, and images.
 
 Core responsibilities:
 
@@ -66,6 +66,7 @@ Core responsibilities:
 - Expose fixed catalog options for product types and sizes.
 - Let admins create, update, and soft delete products.
 - Let admins create, update, and soft delete variants.
+- Manage multiple product-level and variant-level image URLs.
 - Track stock per product variant.
 - Enforce unique active variant combinations per product, size, and color.
 
@@ -73,6 +74,7 @@ Owned data models:
 
 - Product
 - ProductVariant
+- ProductImage
 
 API groups:
 

@@ -1,0 +1,749 @@
+{
+  "info": {
+    "_postman_id": "64f71b7f-6e7c-40da-b1d4-3b87d2710f87",
+    "name": "KNG Fashion - Product",
+    "description": "Manual Postman checks for implemented Product backend endpoints. Run requests in order. Admin requests use Postman's cookie jar after admin login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@kng-fashion.local"
+    },
+    {
+      "key": "adminPassword",
+      "value": "AdminPassword123"
+    },
+    {
+      "key": "productName",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "variantId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('returns current health text', function () {",
+              "  pm.expect(pm.response.text()).to.equal('KNG_FASHION WORKED!');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('login returns admin user', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.data.user.role).to.equal('ADMIN');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Create Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{productName}}\",\n  \"description\": \"Daily cotton shirt created from Postman\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 250000,\n  \"imageUrl\": \"https://example.com/placeholder.jpg\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.collectionVariables.get('productName')) {",
+              "  pm.collectionVariables.set('productName', `Postman Shirt ${Date.now()}`);",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('product created', function () {",
+              "  pm.expect(body.message).to.equal('Product created successfully');",
+              "  pm.expect(body.data.name).to.equal(pm.collectionVariables.get('productName'));",
+              "  pm.expect(body.data.type).to.equal('SHIRT');",
+              "});",
+              "pm.collectionVariables.set('productId', body.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 List Admin Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/products?type=SHIRT&page=1&limit=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "SHIRT"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('admin product list has pagination shape', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Products retrieved successfully');",
+              "  pm.expect(body.data.items).to.be.an('array');",
+              "  pm.expect(body.data.page).to.equal(1);",
+              "  pm.expect(body.data.limit).to.equal(20);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Get Admin Product Detail",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{productId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('admin detail is selected product', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Product retrieved successfully');",
+              "  pm.expect(body.data.id).to.equal(pm.collectionVariables.get('productId'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Create Product Variant",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": \"M\",\n  \"color\": \"Black\",\n  \"stock\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{productId}}/variants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{productId}}",
+            "variants"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('variant created', function () {",
+              "  pm.expect(body.message).to.equal('Product variant created successfully');",
+              "  pm.expect(body.data.size).to.equal('M');",
+              "  pm.expect(body.data.color).to.equal('Black');",
+              "});",
+              "pm.collectionVariables.set('variantId', body.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Duplicate Variant Check",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": \"M\",\n  \"color\": \"Black\",\n  \"stock\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{productId}}/variants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{productId}}",
+            "variants"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409', function () {",
+              "  pm.response.to.have.status(409);",
+              "});",
+              "pm.test('duplicate variant message is correct', function () {",
+              "  pm.expect(pm.response.json().message).to.equal('Product variant with this size and color already exists.');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 List Product Variants",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{productId}}/variants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{productId}}",
+            "variants"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('variant list contains created variant', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Product variants retrieved successfully');",
+              "  pm.expect(body.data.map((item) => item.id)).to.include(pm.collectionVariables.get('variantId'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Update Product Variant",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": \"L\",\n  \"color\": \"Black\",\n  \"stock\": 12,\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/variants/{{variantId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "variants",
+            "{{variantId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('variant updated', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Product variant updated successfully');",
+              "  pm.expect(body.data.size).to.equal('L');",
+              "  pm.expect(body.data.stock).to.equal(12);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Get Product Options",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/options",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "options"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('options return fixed types and sizes', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Product options retrieved successfully');",
+              "  pm.expect(body.data.types).to.eql(['SHIRT', 'PANT', 'JACKET']);",
+              "  pm.expect(body.data.sizes).to.eql(['S', 'M', 'L', 'XL']);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 List Public Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products?type=SHIRT&size=L&color=Black&page=1&limit=12",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "SHIRT"
+            },
+            {
+              "key": "size",
+              "value": "L"
+            },
+            {
+              "key": "color",
+              "value": "Black"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "12"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('public list contains created product', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Products retrieved successfully');",
+              "  pm.expect(body.data.items.map((item) => item.id)).to.include(pm.collectionVariables.get('productId'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Get Public Product Detail",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "{{productId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('public detail includes updated variant', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Product retrieved successfully');",
+              "  pm.expect(body.data.id).to.equal(pm.collectionVariables.get('productId'));",
+              "  pm.expect(body.data.variants.map((item) => item.id)).to.include(pm.collectionVariables.get('variantId'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Update Product",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{productName}} Updated\",\n  \"description\": \"Updated from Postman\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 260000,\n  \"imageUrl\": \"https://example.com/placeholder-updated.jpg\",\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{productId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('product updated', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.message).to.equal('Product updated successfully');",
+              "  pm.expect(body.data.price).to.equal(260000);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Soft Delete Variant",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/variants/{{variantId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "variants",
+            "{{variantId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('variant soft deleted response returned', function () {",
+              "  pm.expect(pm.response.json().message).to.equal('Product variant deleted successfully');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Soft Delete Product",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{productId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('product soft deleted response returned', function () {",
+              "  pm.expect(pm.response.json().message).to.equal('Product deleted successfully');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 List Admin Products Include Deleted",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/products?includeDeleted=true&page=1&limit=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products"
+          ],
+          "query": [
+            {
+              "key": "includeDeleted",
+              "value": "true"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('deleted product can be found by admin includeDeleted', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.data.items.map((item) => item.id)).to.include(pm.collectionVariables.get('productId'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Public Deleted Product Detail Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "{{productId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "pm.test('deleted product is hidden from public detail', function () {",
+              "  pm.expect(pm.response.json().message).to.equal('Product not found.');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

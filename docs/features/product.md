@@ -10,7 +10,7 @@ Related source-of-truth docs:
 
 ## Feature Goal
 
-Provide the product catalog and admin product management for KNG Fashion. Customers can browse active products, view product details, and inspect available size/color variants. Admins can manage products, variants, stock, and soft deletion.
+Provide the product catalog and admin product management for KNG Fashion. Customers can browse active products, view product details, inspect available size/color variants, and view product/variant image galleries. Admins can manage products, variants, images, stock, and soft deletion.
 
 The MVP supports only shirts, pants, and jackets. Product variants are defined by size and color, with stock tracked per variant.
 
@@ -24,6 +24,7 @@ Customers can:
 - Filter products by type, size, and color.
 - View product detail.
 - View available variants and stock.
+- View product-level and variant-level images.
 - View fixed product options.
 
 ### Admin
@@ -37,6 +38,7 @@ Admins can:
 - View product variants.
 - Create variants.
 - Update variant size, color, stock, and active status.
+- Manage product-level and variant-level image URLs.
 - Soft delete variants.
 
 ## User Actions
@@ -55,6 +57,8 @@ System returns only active, non-deleted products.
 
 A customer opens a product detail page. System returns product information and active, non-deleted variants.
 
+Product detail includes product-level images and each variant's own images.
+
 ### View Product Options
 
 Frontend requests fixed product options for filters and forms.
@@ -68,9 +72,13 @@ System returns:
 
 Admin can create, update, and soft delete products.
 
+Product create requires at least one product-level image.
+
 ### Manage Product Variant
 
 Admin can create, update, and soft delete product variants. Variant stock is controlled at the size/color level.
+
+Variant images are optional and can be managed through variant create/update payloads.
 
 ## Business Rules
 
@@ -79,6 +87,15 @@ Admin can create, update, and soft delete product variants. Variant stock is con
 - Colors are free-text strings.
 - Product price is stored on `Product`.
 - All variants of the same product use the same product price.
+- Product-level images are stored on `ProductImage` with `variantId = null`.
+- Variant-level images are stored on `ProductImage` with `variantId` set.
+- Product create requires at least one product-level image.
+- Variant images are optional.
+- Images are URL strings only; file upload/storage is out of scope for MVP.
+- Image display order uses `sortOrder`.
+- `isPrimary` marks the preferred thumbnail image.
+- `thumbnailUrl` is selected from the primary product image, falling back to the first product image by `sortOrder`.
+- If a variant image references a variant, the variant must belong to the same product as the image.
 - Stock is stored on `ProductVariant`.
 - Customer-facing APIs hide inactive products, inactive variants, and soft-deleted records.
 - Admin product list can include deleted products only when `includeDeleted=true`.
@@ -127,6 +144,7 @@ Data models used:
 
 - Product
 - ProductVariant
+- ProductImage
 
 ## Edge Cases
 
@@ -135,6 +153,11 @@ Data models used:
 - Customer requests inactive product.
 - Customer requests soft-deleted product.
 - Product detail has no active variants.
+- Product detail has no product images.
+- Admin creates product without product-level images.
+- Admin creates image with missing URL.
+- Admin creates variant image for a variant that does not belong to the product.
+- Admin updates images and replaces current non-deleted images.
 - Admin creates product with invalid type.
 - Admin creates product with negative price.
 - Admin updates product that does not exist.
@@ -156,10 +179,17 @@ Data models used:
 - [x] Add `Size` enum with `S`, `M`, `L`, and `XL`.
 - [x] Add `Product` model fields from `docs/02_DATA_MODEL.md`.
 - [x] Add `ProductVariant` model fields from `docs/02_DATA_MODEL.md`.
+- [ ] Add `ProductImage` model fields from `docs/02_DATA_MODEL.md`.
 - [x] Add relation from `Product` to `ProductVariant`.
+- [ ] Add relation from `Product` to `ProductImage`.
+- [ ] Add optional relation from `ProductVariant` to `ProductImage`.
 - [x] Add unique constraint on product, size, and color variant combination.
 - [x] Add soft delete fields for product and variant.
+- [ ] Add soft delete fields for product images.
 - [x] Add Prisma migration for product models.
+- [ ] Add Prisma migration for product images.
+- [ ] Backfill existing `Product.imageUrl` into primary `ProductImage`.
+- [ ] Remove `Product.imageUrl` after image backfill.
 
 ### Backend Product
 
@@ -177,6 +207,11 @@ Data models used:
 - [x] Implement admin variant create endpoint.
 - [x] Implement admin variant update endpoint.
 - [x] Implement admin variant soft delete endpoint.
+- [ ] Update product create/update to accept product-level `images`.
+- [ ] Update variant create/update to accept optional variant-level `images`.
+- [ ] Update product list response to return `thumbnailUrl`.
+- [ ] Update product detail response to return product-level `images`.
+- [ ] Update product detail response to return variant-level `images`.
 
 ### Backend Validation and Rules
 
@@ -189,6 +224,11 @@ Data models used:
 - [x] Reject negative product price.
 - [x] Reject negative variant stock.
 - [x] Reject duplicate size/color variant on the same product.
+- [ ] Require at least one product-level image on product create.
+- [ ] Validate image URL strings.
+- [ ] Validate image `sortOrder`.
+- [ ] Validate variant image ownership matches product.
+- [ ] Replace current non-deleted images when `images` is provided on update.
 - [x] Hide inactive or deleted products from customer catalog.
 - [x] Hide inactive or deleted variants from customer detail.
 - [x] Allow admin list to include deleted products with `includeDeleted=true`.
@@ -214,6 +254,9 @@ Data models used:
 
 - [x] Add Swagger decorators for customer product endpoints.
 - [x] Add Swagger decorators for admin product endpoints.
+- [ ] Update Swagger DTOs for product and variant image arrays.
+- [ ] Update Product service unit tests for image behavior.
+- [ ] Update Product Postman collection for image payloads.
 - [x] Add Product service unit tests listed in `docs/tests/product_service_test_plan.md`.
 - [x] Record Product service test results in `docs/tests/product_service_test_result.md`.
 - [x] Update `docs/TASK_BREAKDOWN.md` after implementation.
