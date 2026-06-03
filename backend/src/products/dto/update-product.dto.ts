@@ -1,15 +1,19 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsBoolean,
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { ProductType } from '../../../generated/prisma/client';
+import { ProductImageInputDto } from './product-image-input.dto';
 
 export class UpdateProductDto {
   @ApiPropertyOptional({ example: 'Updated Essential Shirt' })
@@ -42,11 +46,13 @@ export class UpdateProductDto {
   @Min(0)
   price?: number;
 
-  @ApiPropertyOptional({ example: 'https://example.com/placeholder.jpg' })
+  @ApiPropertyOptional({ type: [ProductImageInputDto] })
   @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  imageUrl?: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageInputDto)
+  images?: ProductImageInputDto[];
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()

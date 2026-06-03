@@ -171,9 +171,9 @@ Backend tasks:
 - [x] Enforce fixed product types: `SHIRT`, `PANT`, `JACKET`.
 - [x] Enforce fixed sizes: `S`, `M`, `L`, `XL`.
 - [x] Support free-text colors.
-- [ ] Add product-level and variant-level image model.
-- [ ] Update product and variant APIs to use image arrays.
-- [ ] Replace `imageUrl` response fields with `thumbnailUrl` and `images`.
+- [x] Add product-level and variant-level image model.
+- [x] Update product and variant APIs to use image arrays.
+- [x] Replace `imageUrl` response fields with `thumbnailUrl` and `images`.
 - [x] Hide inactive or deleted products from customer catalog.
 - [x] Add Swagger decorators for Product service endpoints.
 

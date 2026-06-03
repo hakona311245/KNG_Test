@@ -1,7 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Size } from '../../../generated/prisma/client';
+import { ProductImageInputDto } from './product-image-input.dto';
 
 export class CreateProductVariantDto {
   @ApiProperty({ enum: Size, example: Size.M })
@@ -18,4 +28,11 @@ export class CreateProductVariantDto {
   @IsInt()
   @Min(0)
   stock!: number;
+
+  @ApiPropertyOptional({ type: [ProductImageInputDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageInputDto)
+  images?: ProductImageInputDto[];
 }

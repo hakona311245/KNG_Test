@@ -1,7 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { ProductType } from '../../../generated/prisma/client';
+import { ProductImageInputDto } from './product-image-input.dto';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Essential Shirt' })
@@ -29,8 +39,10 @@ export class CreateProductDto {
   @Min(0)
   price!: number;
 
-  @ApiProperty({ example: 'https://example.com/placeholder.jpg' })
-  @IsString()
-  @IsNotEmpty()
-  imageUrl!: string;
+  @ApiProperty({ type: [ProductImageInputDto] })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageInputDto)
+  images!: ProductImageInputDto[];
 }

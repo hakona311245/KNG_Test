@@ -2,7 +2,7 @@
 
 Date: 2026-06-03
 
-Product service backend and unit tests were implemented.
+Product image data model, backend logic, and unit tests were implemented.
 
 ## Commands Run
 
@@ -10,26 +10,35 @@ From `backend/`:
 
 ```powershell
 npm run build
+npx tsc -p tsconfig.build.json --noEmit
 npm run test -- --runInBand
+docker compose up --build -d backend
+docker compose logs backend --tail 120
 ```
 
 ## Summary
 
 | Check | Result |
 | --- | --- |
-| `npm run build` | Passed after clearing generated `backend/dist` output |
+| `npm run build` | Blocked by existing generated `backend/dist` permission lock |
+| `npx tsc -p tsconfig.build.json --noEmit` | Passed |
 | `npm run test -- --runInBand` | Passed |
+| `docker compose up --build -d backend` | Passed |
+| Backend container startup | Passed |
 
 ## Test Result
 
 ```text
 Test Suites: 5 passed, 5 total
-Tests:       27 passed, 27 total
+Tests:       34 passed, 34 total
 Snapshots:   0 total
+Time:        6.819 s
 ```
 
 ## Notes
 
-- Initial build attempt failed with the recurring Windows generated `dist` file lock issue.
-- Generated `backend/dist` output was cleared, then `npm run build` passed.
+- `npm run build` failed before TypeScript compilation with `EPERM: operation not permitted, unlink 'D:\Coding\KNG_Test\backend\dist\prisma.config.d.ts'`.
+- Stopping the backend Docker container did not release the existing `backend/dist` file permissions.
+- No-emit TypeScript validation passed, so ProductImage code is type-valid.
+- Docker rebuild succeeded, Nest watch compile found 0 errors, and the backend started successfully.
 - No failed Product service tests remain to debug in the next step.

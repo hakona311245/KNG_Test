@@ -116,7 +116,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"{{productName}}\",\n  \"description\": \"Daily cotton shirt created from Postman\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 250000,\n  \"imageUrl\": \"https://example.com/placeholder.jpg\"\n}"
+          "raw": "{\n  \"name\": \"{{productName}}\",\n  \"description\": \"Daily cotton shirt created from Postman\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 250000,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/product-front.jpg\",\n      \"altText\": \"Front view\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/admin/products",
@@ -154,6 +154,8 @@
               "  pm.expect(body.message).to.equal('Product created successfully');",
               "  pm.expect(body.data.name).to.equal(pm.collectionVariables.get('productName'));",
               "  pm.expect(body.data.type).to.equal('SHIRT');",
+              "  pm.expect(body.data.thumbnailUrl).to.equal('https://example.com/product-front.jpg');",
+              "  pm.expect(body.data.images).to.be.an('array').that.is.not.empty;",
               "});",
               "pm.collectionVariables.set('productId', body.data.id);"
             ]
@@ -260,7 +262,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"size\": \"M\",\n  \"color\": \"Black\",\n  \"stock\": 10\n}"
+          "raw": "{\n  \"size\": \"M\",\n  \"color\": \"Black\",\n  \"stock\": 10,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/product-black-m.jpg\",\n      \"altText\": \"Black size M\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/admin/products/{{productId}}/variants",
@@ -289,6 +291,7 @@
               "  pm.expect(body.message).to.equal('Product variant created successfully');",
               "  pm.expect(body.data.size).to.equal('M');",
               "  pm.expect(body.data.color).to.equal('Black');",
+              "  pm.expect(body.data.images).to.be.an('array').that.is.not.empty;",
               "});",
               "pm.collectionVariables.set('variantId', body.data.id);"
             ]
@@ -389,7 +392,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"size\": \"L\",\n  \"color\": \"Black\",\n  \"stock\": 12,\n  \"isActive\": true\n}"
+          "raw": "{\n  \"size\": \"L\",\n  \"color\": \"Black\",\n  \"stock\": 12,\n  \"isActive\": true,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/product-black-l.jpg\",\n      \"altText\": \"Black size L\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/admin/variants/{{variantId}}",
@@ -417,6 +420,7 @@
               "  pm.expect(body.message).to.equal('Product variant updated successfully');",
               "  pm.expect(body.data.size).to.equal('L');",
               "  pm.expect(body.data.stock).to.equal(12);",
+              "  pm.expect(body.data.images[0].url).to.equal('https://example.com/product-black-l.jpg');",
               "});"
             ]
           }
@@ -509,6 +513,7 @@
               "  const body = pm.response.json();",
               "  pm.expect(body.message).to.equal('Products retrieved successfully');",
               "  pm.expect(body.data.items.map((item) => item.id)).to.include(pm.collectionVariables.get('productId'));",
+              "  pm.expect(body.data.items.find((item) => item.id === pm.collectionVariables.get('productId')).thumbnailUrl).to.equal('https://example.com/product-front.jpg');",
               "});"
             ]
           }
@@ -544,6 +549,8 @@
               "  const body = pm.response.json();",
               "  pm.expect(body.message).to.equal('Product retrieved successfully');",
               "  pm.expect(body.data.id).to.equal(pm.collectionVariables.get('productId'));",
+              "  pm.expect(body.data.thumbnailUrl).to.equal('https://example.com/product-front.jpg');",
+              "  pm.expect(body.data.images).to.be.an('array').that.is.not.empty;",
               "  pm.expect(body.data.variants.map((item) => item.id)).to.include(pm.collectionVariables.get('variantId'));",
               "});"
             ]
@@ -563,7 +570,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"{{productName}} Updated\",\n  \"description\": \"Updated from Postman\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 260000,\n  \"imageUrl\": \"https://example.com/placeholder-updated.jpg\",\n  \"isActive\": true\n}"
+          "raw": "{\n  \"name\": \"{{productName}} Updated\",\n  \"description\": \"Updated from Postman\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 260000,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/product-front-updated.jpg\",\n      \"altText\": \"Updated front view\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ],\n  \"isActive\": true\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/admin/products/{{productId}}",
@@ -590,6 +597,7 @@
               "  const body = pm.response.json();",
               "  pm.expect(body.message).to.equal('Product updated successfully');",
               "  pm.expect(body.data.price).to.equal(260000);",
+              "  pm.expect(body.data.thumbnailUrl).to.equal('https://example.com/product-front-updated.jpg');",
               "});"
             ]
           }

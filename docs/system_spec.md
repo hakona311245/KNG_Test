@@ -89,9 +89,9 @@ These URLs are planned defaults and can be adjusted during implementation.
 - [x] Implement variant soft delete.
 - [x] Enforce fixed sizes: `S`, `M`, `L`, `XL`.
 - [x] Support free-text variant colors.
-- [ ] Add product-level and variant-level image model.
-- [ ] Update product and variant APIs to use image arrays.
-- [ ] Replace single product image URL with `thumbnailUrl` and `images`.
+- [x] Add product-level and variant-level image model.
+- [x] Update product and variant APIs to use image arrays.
+- [x] Replace single product image URL with `thumbnailUrl` and `images`.
 - [x] Enforce unique active variant by product, size, and color.
 - [x] Track stock at variant level.
 

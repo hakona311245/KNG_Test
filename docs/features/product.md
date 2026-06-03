@@ -179,17 +179,17 @@ Data models used:
 - [x] Add `Size` enum with `S`, `M`, `L`, and `XL`.
 - [x] Add `Product` model fields from `docs/02_DATA_MODEL.md`.
 - [x] Add `ProductVariant` model fields from `docs/02_DATA_MODEL.md`.
-- [ ] Add `ProductImage` model fields from `docs/02_DATA_MODEL.md`.
+- [x] Add `ProductImage` model fields from `docs/02_DATA_MODEL.md`.
 - [x] Add relation from `Product` to `ProductVariant`.
-- [ ] Add relation from `Product` to `ProductImage`.
-- [ ] Add optional relation from `ProductVariant` to `ProductImage`.
+- [x] Add relation from `Product` to `ProductImage`.
+- [x] Add optional relation from `ProductVariant` to `ProductImage`.
 - [x] Add unique constraint on product, size, and color variant combination.
 - [x] Add soft delete fields for product and variant.
-- [ ] Add soft delete fields for product images.
+- [x] Add soft delete fields for product images.
 - [x] Add Prisma migration for product models.
-- [ ] Add Prisma migration for product images.
-- [ ] Backfill existing `Product.imageUrl` into primary `ProductImage`.
-- [ ] Remove `Product.imageUrl` after image backfill.
+- [x] Add Prisma migration for product images.
+- [x] Backfill existing `Product.imageUrl` into primary `ProductImage`.
+- [x] Remove `Product.imageUrl` after image backfill.
 
 ### Backend Product
 
@@ -207,11 +207,11 @@ Data models used:
 - [x] Implement admin variant create endpoint.
 - [x] Implement admin variant update endpoint.
 - [x] Implement admin variant soft delete endpoint.
-- [ ] Update product create/update to accept product-level `images`.
-- [ ] Update variant create/update to accept optional variant-level `images`.
-- [ ] Update product list response to return `thumbnailUrl`.
-- [ ] Update product detail response to return product-level `images`.
-- [ ] Update product detail response to return variant-level `images`.
+- [x] Update product create/update to accept product-level `images`.
+- [x] Update variant create/update to accept optional variant-level `images`.
+- [x] Update product list response to return `thumbnailUrl`.
+- [x] Update product detail response to return product-level `images`.
+- [x] Update product detail response to return variant-level `images`.
 
 ### Backend Validation and Rules
 
@@ -224,11 +224,11 @@ Data models used:
 - [x] Reject negative product price.
 - [x] Reject negative variant stock.
 - [x] Reject duplicate size/color variant on the same product.
-- [ ] Require at least one product-level image on product create.
-- [ ] Validate image URL strings.
-- [ ] Validate image `sortOrder`.
-- [ ] Validate variant image ownership matches product.
-- [ ] Replace current non-deleted images when `images` is provided on update.
+- [x] Require at least one product-level image on product create.
+- [x] Validate image URL strings.
+- [x] Validate image `sortOrder`.
+- [x] Validate variant image ownership matches product.
+- [x] Replace current non-deleted images when `images` is provided on update.
 - [x] Hide inactive or deleted products from customer catalog.
 - [x] Hide inactive or deleted variants from customer detail.
 - [x] Allow admin list to include deleted products with `includeDeleted=true`.

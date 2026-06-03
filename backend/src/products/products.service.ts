@@ -1,14 +1,16 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ProductType, Size } from '../../generated/prisma/client';
+import { Prisma, ProductType, Size } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListAdminProductsQueryDto } from './dto/list-admin-products-query.dto';
 import { ListProductsQueryDto } from './dto/list-products-query.dto';
+import { ProductImageInputDto } from './dto/product-image-input.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -50,15 +52,7 @@ export class ProductsService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          variants: {
-            where: {
-              isActive: true,
-              deletedAt: null,
-            },
-            orderBy: [{ size: 'asc' }, { color: 'asc' }],
-          },
-        },
+        include: this.getProductInclude(),
       }),
       this.prisma.product.count({ where }),
     ]);
@@ -73,15 +67,7 @@ export class ProductsService {
         isActive: true,
         deletedAt: null,
       },
-      include: {
-        variants: {
-          where: {
-            isActive: true,
-            deletedAt: null,
-          },
-          orderBy: [{ size: 'asc' }, { color: 'asc' }],
-        },
-      },
+      include: this.getProductInclude(),
     });
 
     if (!product) {
@@ -105,12 +91,7 @@ export class ProductsService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          variants: {
-            where: query.includeDeleted ? {} : { deletedAt: null },
-            orderBy: [{ size: 'asc' }, { color: 'asc' }],
-          },
-        },
+        include: this.getAdminProductInclude(query.includeDeleted),
       }),
       this.prisma.product.count({ where }),
     ]);
@@ -119,27 +100,34 @@ export class ProductsService {
   }
 
   async createProduct(dto: CreateProductDto) {
-    return this.prisma.product.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-        type: dto.type,
-        material: dto.material,
-        price: dto.price,
-        imageUrl: dto.imageUrl,
-      },
-      include: { variants: true },
+    if (dto.images.length === 0) {
+      throw new BadRequestException('Product requires at least one image.');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: {
+          name: dto.name,
+          description: dto.description,
+          type: dto.type,
+          material: dto.material,
+          price: dto.price,
+        },
+      });
+
+      await this.createProductImages(tx, product.id, null, dto.images);
+
+      return tx.product.findUniqueOrThrow({
+        where: { id: product.id },
+        include: this.getAdminProductInclude(true),
+      });
     });
   }
 
   async getAdminProductById(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: {
-        variants: {
-          orderBy: [{ size: 'asc' }, { color: 'asc' }],
-        },
-      },
+      include: this.getAdminProductInclude(true),
     });
 
     if (!product) {
@@ -151,11 +139,26 @@ export class ProductsService {
 
   async updateProduct(id: string, dto: UpdateProductDto) {
     await this.ensureProductExists(id);
+    const { images, ...productData } = dto;
 
-    return this.prisma.product.update({
-      where: { id },
-      data: dto,
-      include: { variants: true },
+    if (images && images.length === 0) {
+      throw new BadRequestException('Product requires at least one image.');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.product.update({
+        where: { id },
+        data: productData,
+      });
+
+      if (images) {
+        await this.replaceProductImages(tx, id, null, images);
+      }
+
+      return tx.product.findUniqueOrThrow({
+        where: { id },
+        include: this.getAdminProductInclude(true),
+      });
     });
   }
 
@@ -165,7 +168,7 @@ export class ProductsService {
     return this.prisma.product.update({
       where: { id },
       data: { deletedAt: new Date() },
-      include: { variants: true },
+      include: this.getAdminProductInclude(true),
     });
   }
 
@@ -178,6 +181,7 @@ export class ProductsService {
         deletedAt: null,
       },
       orderBy: [{ size: 'asc' }, { color: 'asc' }],
+      include: this.getVariantInclude(),
     });
   }
 
@@ -189,18 +193,30 @@ export class ProductsService {
       dto.color,
     );
 
-    return this.prisma.productVariant.create({
-      data: {
-        productId,
-        size: dto.size,
-        color: dto.color,
-        stock: dto.stock,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.create({
+        data: {
+          productId,
+          size: dto.size,
+          color: dto.color,
+          stock: dto.stock,
+        },
+      });
+
+      if (dto.images) {
+        await this.createProductImages(tx, productId, variant.id, dto.images);
+      }
+
+      return tx.productVariant.findUniqueOrThrow({
+        where: { id: variant.id },
+        include: this.getVariantInclude(),
+      });
     });
   }
 
   async updateProductVariant(id: string, dto: UpdateProductVariantDto) {
     const variant = await this.ensureVariantExists(id);
+    const { images, ...variantData } = dto;
     const nextSize = dto.size ?? variant.size;
     const nextColor = dto.color ?? variant.color;
 
@@ -213,9 +229,20 @@ export class ProductsService {
       );
     }
 
-    return this.prisma.productVariant.update({
-      where: { id },
-      data: dto,
+    return this.prisma.$transaction(async (tx) => {
+      await tx.productVariant.update({
+        where: { id },
+        data: variantData,
+      });
+
+      if (images) {
+        await this.replaceProductImages(tx, variant.productId, id, images);
+      }
+
+      return tx.productVariant.findUniqueOrThrow({
+        where: { id },
+        include: this.getVariantInclude(),
+      });
     });
   }
 
@@ -225,6 +252,95 @@ export class ProductsService {
     return this.prisma.productVariant.update({
       where: { id },
       data: { deletedAt: new Date() },
+      include: this.getVariantInclude(),
+    });
+  }
+
+  private getProductInclude() {
+    return {
+      images: this.getProductImagesArgs(),
+      variants: {
+        where: {
+          isActive: true,
+          deletedAt: null,
+        },
+        orderBy: [{ size: 'asc' }, { color: 'asc' }],
+        include: this.getVariantInclude(),
+      },
+    } satisfies Prisma.ProductInclude;
+  }
+
+  private getAdminProductInclude(includeDeletedVariants = false) {
+    return {
+      images: this.getProductImagesArgs(),
+      variants: {
+        where: includeDeletedVariants ? {} : { deletedAt: null },
+        orderBy: [{ size: 'asc' }, { color: 'asc' }],
+        include: this.getVariantInclude(),
+      },
+    } satisfies Prisma.ProductInclude;
+  }
+
+  private getVariantInclude() {
+    return {
+      images: {
+        where: {
+          deletedAt: null,
+        },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      },
+    } satisfies Prisma.ProductVariantInclude;
+  }
+
+  private getProductImagesArgs() {
+    return {
+      where: {
+        variantId: null,
+        deletedAt: null,
+      },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    } satisfies Prisma.Product$imagesArgs;
+  }
+
+  private async replaceProductImages(
+    tx: Prisma.TransactionClient,
+    productId: string,
+    variantId: string | null,
+    images: ProductImageInputDto[],
+  ) {
+    await tx.productImage.updateMany({
+      where: {
+        productId,
+        variantId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    await this.createProductImages(tx, productId, variantId, images);
+  }
+
+  private async createProductImages(
+    tx: Prisma.TransactionClient,
+    productId: string,
+    variantId: string | null,
+    images: ProductImageInputDto[],
+  ) {
+    if (images.length === 0) {
+      return;
+    }
+
+    await tx.productImage.createMany({
+      data: images.map((image, index) => ({
+        productId,
+        variantId,
+        url: image.url,
+        altText: image.altText,
+        sortOrder: image.sortOrder ?? index,
+        isPrimary: image.isPrimary ?? index === 0,
+      })),
     });
   }
 
