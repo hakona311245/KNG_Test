@@ -222,7 +222,8 @@ Fields:
 
 Rules:
 
-- Images are URL strings only; file upload/storage is out of scope for MVP.
+- Product images can be uploaded to Cloudinary through the admin upload endpoint.
+- The database stores image URL strings only; image binary storage is out of scope for MVP.
 - `productId` is required.
 - `variantId` is nullable.
 - `variantId = null` means the image belongs to the product in general.

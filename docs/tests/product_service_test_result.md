@@ -2,7 +2,7 @@
 
 Date: 2026-06-03
 
-Product image data model, backend logic, and unit tests were implemented.
+Product image data model, Cloudinary upload support, backend logic, and unit tests were implemented.
 
 ## Commands Run
 
@@ -13,6 +13,7 @@ npm run build
 npx tsc -p tsconfig.build.json --noEmit
 npm run test -- --runInBand
 docker compose up --build -d backend
+docker compose exec backend npm install
 docker compose logs backend --tail 120
 ```
 
@@ -29,10 +30,10 @@ docker compose logs backend --tail 120
 ## Test Result
 
 ```text
-Test Suites: 5 passed, 5 total
-Tests:       34 passed, 34 total
+Test Suites: 6 passed, 6 total
+Tests:       41 passed, 41 total
 Snapshots:   0 total
-Time:        6.819 s
+Time:        4.259 s
 ```
 
 ## Notes
@@ -41,4 +42,6 @@ Time:        6.819 s
 - Stopping the backend Docker container did not release the existing `backend/dist` file permissions.
 - No-emit TypeScript validation passed, so ProductImage code is type-valid.
 - Docker rebuild succeeded, Nest watch compile found 0 errors, and the backend started successfully.
+- The Docker `backend_node_modules` named volume needed `docker compose exec backend npm install` before the container could see the new Cloudinary/Multer packages.
+- Cloudinary config now supports either `CLOUDINARY_URL` or separate Cloudinary credential variables.
 - No failed Product service tests remain to debug in the next step.

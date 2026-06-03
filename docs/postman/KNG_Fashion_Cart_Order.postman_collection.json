@@ -1,0 +1,949 @@
+{
+  "info": {
+    "_postman_id": "2d9161d8-0f28-41d8-9f04-2062ce3a6ef1",
+    "name": "KNG Fashion - Cart And Order",
+    "description": "Manual Postman checks for Phase 6. This collection safely creates demo catalog data through admin APIs, then runs customer cart, checkout, order, cancellation, and admin order flows. Uses Postman's cookie jar for HttpOnly auth cookies.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@kng-fashion.local"
+    },
+    {
+      "key": "adminPassword",
+      "value": "AdminPassword123"
+    },
+    {
+      "key": "customerEmail",
+      "value": ""
+    },
+    {
+      "key": "customerPassword",
+      "value": "Password123"
+    },
+    {
+      "key": "seedRunSuffix",
+      "value": ""
+    },
+    {
+      "key": "shirtProductId",
+      "value": ""
+    },
+    {
+      "key": "shirtVariantId",
+      "value": ""
+    },
+    {
+      "key": "pantProductId",
+      "value": ""
+    },
+    {
+      "key": "pantVariantId",
+      "value": ""
+    },
+    {
+      "key": "jacketProductId",
+      "value": ""
+    },
+    {
+      "key": "jacketVariantId",
+      "value": ""
+    },
+    {
+      "key": "cartItemId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": [
+            "{{baseUrl}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('returns current health text', function () {",
+              "  pm.expect(pm.response.text()).to.equal('KNG_FASHION WORKED!');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Admin Login For Safe Catalog Setup",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.collectionVariables.get('seedRunSuffix')) {",
+              "  pm.collectionVariables.set('seedRunSuffix', Date.now().toString());",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('login returns admin user', function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.data.user.role).to.equal('ADMIN');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "03 Seed Shirt Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('shirtProductId', body.data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"KNG Demo Shirt {{seedRunSuffix}}\",\n  \"description\": \"Safe Postman seed shirt for cart and checkout testing\",\n  \"type\": \"SHIRT\",\n  \"material\": \"Cotton\",\n  \"price\": 250000,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/kng-demo-shirt.jpg\",\n      \"altText\": \"Demo shirt\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products"
+          ]
+        }
+      }
+    },
+    {
+      "name": "04 Seed Shirt Variant",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('shirtVariantId', body.data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": \"M\",\n  \"color\": \"Black\",\n  \"stock\": 20,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/kng-demo-shirt-black.jpg\",\n      \"altText\": \"Demo black shirt\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{shirtProductId}}/variants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{shirtProductId}}",
+            "variants"
+          ]
+        }
+      }
+    },
+    {
+      "name": "05 Seed Pant Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('pantProductId', body.data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"KNG Demo Pant {{seedRunSuffix}}\",\n  \"description\": \"Safe Postman seed pant for catalog testing\",\n  \"type\": \"PANT\",\n  \"material\": \"Denim\",\n  \"price\": 320000,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/kng-demo-pant.jpg\",\n      \"altText\": \"Demo pant\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products"
+          ]
+        }
+      }
+    },
+    {
+      "name": "06 Seed Pant Variant",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('pantVariantId', body.data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": \"L\",\n  \"color\": \"Blue\",\n  \"stock\": 15\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{pantProductId}}/variants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{pantProductId}}",
+            "variants"
+          ]
+        }
+      }
+    },
+    {
+      "name": "07 Seed Jacket Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('jacketProductId', body.data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"KNG Demo Jacket {{seedRunSuffix}}\",\n  \"description\": \"Safe Postman seed jacket for catalog testing\",\n  \"type\": \"JACKET\",\n  \"material\": \"Polyester\",\n  \"price\": 550000,\n  \"images\": [\n    {\n      \"url\": \"https://example.com/kng-demo-jacket.jpg\",\n      \"altText\": \"Demo jacket\",\n      \"sortOrder\": 0,\n      \"isPrimary\": true\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products"
+          ]
+        }
+      }
+    },
+    {
+      "name": "08 Seed Jacket Variant",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('jacketVariantId', body.data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": \"XL\",\n  \"color\": \"Olive\",\n  \"stock\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/products/{{jacketProductId}}/variants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "products",
+            "{{jacketProductId}}",
+            "variants"
+          ]
+        }
+      }
+    },
+    {
+      "name": "09 Register Fresh Customer",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('customerEmail', `customer-${Date.now()}@example.com`);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.role).to.equal('CUSTOMER');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"fullName\": \"KNG Demo Customer\",\n  \"password\": \"{{customerPassword}}\",\n  \"phoneNumber\": \"0900000000\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10 Customer Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.user.role).to.equal('CUSTOMER');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11 Add Shirt Variant To Cart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.items.length).to.be.above(0);",
+              "pm.collectionVariables.set('cartItemId', body.data.items[0].id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"variantId\": \"{{shirtVariantId}}\",\n  \"quantity\": 2\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/cart/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cart",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "name": "12 Get Cart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.items[0].variantId).to.equal(pm.collectionVariables.get('shirtVariantId'));",
+              "pm.collectionVariables.set('cartItemId', body.data.items[0].id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/cart",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cart"
+          ]
+        }
+      }
+    },
+    {
+      "name": "13 Update Cart Item Quantity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.items[0].quantity).to.equal(3);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 3\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/cart/items/{{cartItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cart",
+            "items",
+            "{{cartItemId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "14 Checkout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.status).to.equal('PENDING');",
+              "pm.expect(body.data.paymentStatus).to.equal('PAID');",
+              "pm.collectionVariables.set('orderId', body.data.orderId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shippingName\": \"KNG Demo Customer\",\n  \"phone\": \"0900000000\",\n  \"address\": \"123 Nguyen Trai\",\n  \"city\": \"Ho Chi Minh City\",\n  \"note\": \"Call before delivery\",\n  \"paymentOption\": \"COD\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/checkout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "checkout"
+          ]
+        }
+      }
+    },
+    {
+      "name": "15 List My Orders",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.items.length).to.be.above(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      }
+    },
+    {
+      "name": "16 Get My Order Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.id).to.equal(pm.collectionVariables.get('orderId'));",
+              "pm.expect(body.data.items[0].unitPrice).to.equal(250000);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{orderId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "17 Request Order Cancellation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.cancellationRequest.reason).to.equal('I selected the wrong size');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"I selected the wrong size\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders/{{orderId}}/cancel-request",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}",
+            "cancel-request"
+          ]
+        }
+      }
+    },
+    {
+      "name": "18 Admin Login For Order Management",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "19 List Admin Orders",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.items.length).to.be.above(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "orders"
+          ]
+        }
+      }
+    },
+    {
+      "name": "20 Get Admin Order Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.id).to.equal(pm.collectionVariables.get('orderId'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/orders/{{orderId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "21 Admin Update Order Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.status).to.equal('CONFIRMED');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/orders/{{orderId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "orders",
+            "{{orderId}}",
+            "status"
+          ]
+        }
+      }
+    },
+    {
+      "name": "22 Admin Cancel Order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.expect(body.data.status).to.equal('CANCELLED');",
+              "pm.expect(body.data.cancellationRequest.adminNote).to.equal('Approved customer cancellation request');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"adminNote\": \"Approved customer cancellation request\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/orders/{{orderId}}/cancel",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "orders",
+            "{{orderId}}",
+            "cancel"
+          ]
+        }
+      }
+    }
+  ]
+}

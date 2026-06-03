@@ -14,4 +14,27 @@ export const envValidationSchema = Joi.object({
   ADMIN_PASSWORD: Joi.string().min(8).optional(),
   ADMIN_FULL_NAME: Joi.string().optional(),
   ADMIN_PHONE_NUMBER: Joi.string().optional(),
+  CLOUDINARY_URL: Joi.string()
+    .pattern(/^cloudinary:\/\/.+:.+@.+$/)
+    .optional(),
+  CLOUDINARY_CLOUD_NAME: Joi.string().optional(),
+  CLOUDINARY_API_KEY: Joi.string().optional(),
+  CLOUDINARY_API_SECRET: Joi.string().optional(),
+  CLOUDINARY_FOLDER: Joi.string().default('kng-fashion/products'),
+}).custom((env, helpers) => {
+  const hasCloudinaryUrl = Boolean(env.CLOUDINARY_URL);
+  const hasSeparateCloudinaryConfig = Boolean(
+    env.CLOUDINARY_CLOUD_NAME &&
+      env.CLOUDINARY_API_KEY &&
+      env.CLOUDINARY_API_SECRET,
+  );
+
+  if (!hasCloudinaryUrl && !hasSeparateCloudinaryConfig) {
+    return helpers.error('any.custom', {
+      message:
+        'Either CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET must be provided.',
+    });
+  }
+
+  return env;
 });

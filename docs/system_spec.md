@@ -92,50 +92,51 @@ These URLs are planned defaults and can be adjusted during implementation.
 - [x] Add product-level and variant-level image model.
 - [x] Update product and variant APIs to use image arrays.
 - [x] Replace single product image URL with `thumbnailUrl` and `images`.
+- [x] Add admin Cloudinary product image upload endpoint.
 - [x] Enforce unique active variant by product, size, and color.
 - [x] Track stock at variant level.
 
 ### CartAndOrder Service
 
-- [ ] Implement database-backed cart per customer.
-- [ ] Implement get cart.
-- [ ] Implement add cart item.
-- [ ] Implement update cart item quantity.
-- [ ] Implement remove cart item.
-- [ ] Implement checkout with shipping fields.
-- [ ] Support payment options `COD` and `VNPAY`.
-- [ ] Implement mock payment that always succeeds.
-- [ ] Store order item price snapshots at checkout.
-- [ ] Reduce variant stock after successful mock payment.
-- [ ] Clear cart after successful checkout.
-- [ ] Implement customer order history.
-- [ ] Implement customer order detail.
-- [ ] Implement pending-order cancellation request with reason.
-- [ ] Implement admin order list/detail.
-- [ ] Implement admin order status update.
-- [ ] Implement admin order cancellation.
+- [x] Implement database-backed cart per customer.
+- [x] Implement get cart.
+- [x] Implement add cart item.
+- [x] Implement update cart item quantity.
+- [x] Implement remove cart item.
+- [x] Implement checkout with shipping fields.
+- [x] Support payment options `COD` and `VNPAY`.
+- [x] Implement mock payment that always succeeds.
+- [x] Store order item price snapshots at checkout.
+- [x] Reduce variant stock after successful mock payment.
+- [x] Clear cart after successful checkout.
+- [x] Implement customer order history.
+- [x] Implement customer order detail.
+- [x] Implement pending-order cancellation request with reason.
+- [x] Implement admin order list/detail.
+- [x] Implement admin order status update.
+- [x] Implement admin order cancellation.
 
 ### API Documentation and Tests
 
 - [x] Add Swagger setup at `/api/docs`.
-- [ ] Add Swagger decorators for all MVP endpoints.
-- [ ] Keep Swagger behavior aligned with `docs/01_API_CONTRACT.md`.
+- [x] Add Swagger decorators for all MVP endpoints.
+- [x] Keep Swagger behavior aligned with `docs/01_API_CONTRACT.md`.
 - [x] Add DTO validation for auth and admin customer request payloads.
 - [x] Add auth and role guard tests.
-- [ ] Add service tests for stock and checkout transaction rules.
+- [x] Add service tests for stock and checkout transaction rules.
 - [ ] Add API tests for customer and admin flows.
 
 ## Frontend Progress Checklist
 
 ### Project Setup
 
-- [ ] Scaffold Vite React app in `frontend/`.
-- [ ] Install and configure Tailwind CSS.
-- [ ] Add routing.
-- [ ] Add shared layout for customer pages.
+- [x] Scaffold Vite React app in `frontend/`.
+- [x] Install and configure Tailwind CSS.
+- [x] Add routing.
+- [x] Add shared layout for customer pages.
 - [ ] Add separate admin layout inside the same app.
-- [ ] Configure Axios API client with `withCredentials: true`.
-- [ ] Add environment variable for API base URL.
+- [x] Configure Axios API client with `withCredentials: true`.
+- [x] Add environment variable for API base URL.
 
 ### Authentication UI
 
@@ -227,6 +228,8 @@ COOKIE_SECURE="false"
 COOKIE_SAME_SITE="lax"
 FRONTEND_URL="http://localhost:5173"
 PORT="3000"
+CLOUDINARY_URL="cloudinary://replace-with-api-key:replace-with-api-secret@replace-with-cloud-name"
+CLOUDINARY_FOLDER="kng-fashion/products"
 ```
 
 ### Frontend
@@ -319,13 +322,13 @@ docker compose exec backend npx prisma studio
 
 ### Backend Done
 
-- [ ] All MVP endpoints from `docs/01_API_CONTRACT.md` are implemented.
+- [x] All MVP endpoints from `docs/01_API_CONTRACT.md` are implemented.
 - [x] Swagger is available at `/api/docs`.
 - [x] Prisma schema matches `docs/02_DATA_MODEL.md`.
 - [x] Auth uses HttpOnly cookies and refresh-token rotation.
 - [x] Customer and admin authorization rules are enforced for implemented User service endpoints.
-- [ ] Checkout creates orders transactionally and prevents negative stock.
-- [ ] Backend tests cover auth, product, cart, checkout, and order rules.
+- [x] Checkout creates orders transactionally and prevents negative stock.
+- [x] Backend tests cover auth, product, cart, checkout, and order rules.
 
 ### Frontend Done
 

@@ -365,9 +365,9 @@ Response:
 
 ## Product Service
 
-The Product service owns product catalog reads, admin product management, fixed product type options, fixed size options, free-text variant colors, product and variant images, variant stock, and product soft delete.
+The Product service owns product catalog reads, admin product management, fixed product type options, fixed size options, free-text variant colors, product and variant images, Cloudinary image upload support, variant stock, and product soft delete.
 
-Total MVP endpoints: 12
+Total MVP endpoints: 13
 
 ### Endpoint Overview
 
@@ -384,6 +384,7 @@ GET /api/admin/products/:productId/variants
 POST /api/admin/products/:productId/variants
 PATCH /api/admin/variants/:variantId
 DELETE /api/admin/variants/:variantId
+POST /api/admin/uploads/product-images
 ```
 
 ### List Products
@@ -483,6 +484,8 @@ Product price is stored on the product. All variants of the same product use the
 
 Product images are stored as URL strings. Product detail returns product-level images and variant-level images. `thumbnailUrl` is selected from the primary product image, falling back to the first product image by `sortOrder`.
 
+Image files are uploaded to Cloudinary by the admin upload endpoint. Product and variant records store only the returned Cloudinary URL in `ProductImage.url`.
+
 ### Get Product Options
 
 ```http
@@ -547,6 +550,44 @@ Request:
 ```
 
 Product create requires at least one product-level image.
+
+### Upload Product Image
+
+```http
+POST /api/admin/uploads/product-images
+```
+
+Auth: `ADMIN`
+
+Content type: `multipart/form-data`
+
+Form data:
+
+- `file`: image file, required
+
+Rules:
+
+- Allowed MIME types: `image/jpeg`, `image/png`, `image/webp`.
+- Maximum file size: `5MB`.
+- Uploads are stored in Cloudinary.
+- The backend returns Cloudinary metadata but stores only image URLs in product image records.
+- Backend uploads use signed Cloudinary credentials from `CLOUDINARY_URL`; an unsigned upload preset is not required.
+
+Response:
+
+```json
+{
+  "data": {
+    "url": "https://res.cloudinary.com/demo/image/upload/v123/kng-fashion/products/product.jpg",
+    "publicId": "kng-fashion/products/product",
+    "width": 1200,
+    "height": 1600,
+    "format": "jpg",
+    "bytes": 123456
+  },
+  "message": "Image uploaded successfully"
+}
+```
 
 ### Get Admin Product Detail
 
@@ -752,6 +793,31 @@ Request:
 }
 ```
 
+Response:
+
+```json
+{
+  "data": {
+    "id": "cart-id",
+    "items": [
+      {
+        "id": "cart-item-id",
+        "variantId": "variant-id",
+        "productId": "product-id",
+        "productName": "Essential Shirt",
+        "size": "M",
+        "color": "Black",
+        "price": 250000,
+        "quantity": 2,
+        "subtotal": 500000
+      }
+    ],
+    "total": 500000
+  },
+  "message": "Cart item added successfully"
+}
+```
+
 ### Update Cart Item
 
 ```http
@@ -768,6 +834,31 @@ Request:
 }
 ```
 
+Response returns the updated cart:
+
+```json
+{
+  "data": {
+    "id": "cart-id",
+    "items": [
+      {
+        "id": "cart-item-id",
+        "variantId": "variant-id",
+        "productId": "product-id",
+        "productName": "Essential Shirt",
+        "size": "M",
+        "color": "Black",
+        "price": 250000,
+        "quantity": 3,
+        "subtotal": 750000
+      }
+    ],
+    "total": 750000
+  },
+  "message": "Cart item updated successfully"
+}
+```
+
 ### Remove Cart Item
 
 ```http
@@ -775,6 +866,19 @@ DELETE /api/cart/items/:itemId
 ```
 
 Auth: `CUSTOMER`
+
+Response returns the updated cart:
+
+```json
+{
+  "data": {
+    "id": "cart-id",
+    "items": [],
+    "total": 0
+  },
+  "message": "Cart item removed successfully"
+}
+```
 
 ### Checkout
 
@@ -832,6 +936,36 @@ GET /api/orders
 
 Auth: `CUSTOMER`
 
+Query parameters:
+
+- `status`
+- `page`: defaults to `1`
+- `limit`: defaults to `20`
+
+Response:
+
+```json
+{
+  "data": {
+    "items": [
+      {
+        "id": "order-id",
+        "status": "PENDING",
+        "paymentOption": "COD",
+        "paymentStatus": "PAID",
+        "total": 500000,
+        "createdAt": "2026-06-03T00:00:00.000Z",
+        "cancellationRequest": null
+      }
+    ],
+    "page": 1,
+    "limit": 20,
+    "total": 1
+  },
+  "message": "Orders retrieved successfully"
+}
+```
+
 ### Get My Order Detail
 
 ```http
@@ -866,7 +1000,8 @@ Response includes order item price snapshots:
         "subtotal": 500000
       }
     ],
-    "total": 500000
+    "total": 500000,
+    "cancellationRequest": null
   },
   "message": "Order retrieved successfully"
 }
@@ -890,6 +1025,34 @@ Request:
 }
 ```
 
+Response returns the order detail with `cancellationRequest` populated:
+
+```json
+{
+  "data": {
+    "id": "order-id",
+    "status": "PENDING",
+    "paymentOption": "COD",
+    "paymentStatus": "PAID",
+    "shippingName": "Nguyen Van A",
+    "phone": "0900000000",
+    "address": "123 Nguyen Trai",
+    "city": "Ho Chi Minh City",
+    "note": "Call before delivery",
+    "items": [],
+    "total": 500000,
+    "cancellationRequest": {
+      "id": "cancellation-request-id",
+      "reason": "I selected the wrong size",
+      "adminNote": null,
+      "createdAt": "2026-06-03T00:00:00.000Z",
+      "resolvedAt": null
+    }
+  },
+  "message": "Order cancellation requested successfully"
+}
+```
+
 ### List Admin Orders
 
 ```http
@@ -901,8 +1064,32 @@ Auth: `ADMIN`
 Query parameters:
 
 - `status`
-- `page`
-- `limit`
+- `page`: defaults to `1`
+- `limit`: defaults to `20`
+
+Response:
+
+```json
+{
+  "data": {
+    "items": [
+      {
+        "id": "order-id",
+        "status": "PENDING",
+        "paymentOption": "COD",
+        "paymentStatus": "PAID",
+        "total": 500000,
+        "createdAt": "2026-06-03T00:00:00.000Z",
+        "cancellationRequest": null
+      }
+    ],
+    "page": 1,
+    "limit": 20,
+    "total": 1
+  },
+  "message": "Orders retrieved successfully"
+}
+```
 
 ### Get Admin Order Detail
 
@@ -911,6 +1098,8 @@ GET /api/admin/orders/:id
 ```
 
 Auth: `ADMIN`
+
+Response uses the order detail shape from `GET /api/orders/:id`.
 
 ### Update Order Status
 
@@ -928,6 +1117,28 @@ Request:
 }
 ```
 
+Response uses the order detail shape:
+
+```json
+{
+  "data": {
+    "id": "order-id",
+    "status": "CONFIRMED",
+    "paymentOption": "COD",
+    "paymentStatus": "PAID",
+    "shippingName": "Nguyen Van A",
+    "phone": "0900000000",
+    "address": "123 Nguyen Trai",
+    "city": "Ho Chi Minh City",
+    "note": "Call before delivery",
+    "items": [],
+    "total": 500000,
+    "cancellationRequest": null
+  },
+  "message": "Order status updated successfully"
+}
+```
+
 ### Cancel Order
 
 ```http
@@ -941,6 +1152,34 @@ Request:
 ```json
 {
   "adminNote": "Approved customer cancellation request"
+}
+```
+
+Response uses the order detail shape with `status = CANCELLED`:
+
+```json
+{
+  "data": {
+    "id": "order-id",
+    "status": "CANCELLED",
+    "paymentOption": "COD",
+    "paymentStatus": "PAID",
+    "shippingName": "Nguyen Van A",
+    "phone": "0900000000",
+    "address": "123 Nguyen Trai",
+    "city": "Ho Chi Minh City",
+    "note": "Call before delivery",
+    "items": [],
+    "total": 500000,
+    "cancellationRequest": {
+      "id": "cancellation-request-id",
+      "reason": "I selected the wrong size",
+      "adminNote": "Approved customer cancellation request",
+      "createdAt": "2026-06-03T00:00:00.000Z",
+      "resolvedAt": "2026-06-03T00:00:00.000Z"
+    }
+  },
+  "message": "Order cancelled successfully"
 }
 ```
 

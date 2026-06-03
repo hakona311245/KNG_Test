@@ -32,10 +32,10 @@ Goal: create the initial runnable project structure.
 Tasks:
 
 - [x] Create `backend/` NestJS project.
-- [ ] Create `frontend/` Vite React project.
+- [x] Create `frontend/` Vite React project.
 - [x] Add root `docker-compose.yml`.
 - [x] Add backend `.env.example`.
-- [ ] Add frontend `.env.example`.
+- [x] Add frontend `.env.example`.
 - [ ] Add root README command section or link to `docs/system_spec.md`.
 - [x] Confirm planned URLs:
   - Frontend: `http://localhost:5173`
@@ -46,7 +46,7 @@ Tasks:
 Done when:
 
 - [ ] Backend starts locally.
-- [ ] Frontend starts locally.
+- [x] Frontend starts locally.
 - [x] Docker Compose can start PostgreSQL.
 
 ## Phase 2: Backend Foundation
@@ -174,6 +174,7 @@ Backend tasks:
 - [x] Add product-level and variant-level image model.
 - [x] Update product and variant APIs to use image arrays.
 - [x] Replace `imageUrl` response fields with `thumbnailUrl` and `images`.
+- [x] Add admin Cloudinary product image upload endpoint.
 - [x] Hide inactive or deleted products from customer catalog.
 - [x] Add Swagger decorators for Product service endpoints.
 
@@ -200,26 +201,26 @@ Goal: implement cart, checkout, mock payment, stock reduction, and orders.
 
 Backend tasks:
 
-- [ ] Implement `GET /api/cart`.
-- [ ] Implement `POST /api/cart/items`.
-- [ ] Implement `PATCH /api/cart/items/:itemId`.
-- [ ] Implement `DELETE /api/cart/items/:itemId`.
-- [ ] Implement `POST /api/checkout`.
-- [ ] Implement `GET /api/orders`.
-- [ ] Implement `GET /api/orders/:id`.
-- [ ] Implement `POST /api/orders/:id/cancel-request`.
-- [ ] Implement `GET /api/admin/orders`.
-- [ ] Implement `GET /api/admin/orders/:id`.
-- [ ] Implement `PATCH /api/admin/orders/:id/status`.
-- [ ] Implement `POST /api/admin/orders/:id/cancel`.
-- [ ] Validate cart ownership.
-- [ ] Validate stock before checkout.
-- [ ] Implement mock payment for `COD` and `VNPAY`.
-- [ ] Store order item price snapshots.
-- [ ] Reduce stock in the same transaction as order creation.
-- [ ] Clear cart after checkout.
-- [ ] Prevent negative stock.
-- [ ] Add Swagger decorators for CartAndOrder endpoints.
+- [x] Implement `GET /api/cart`.
+- [x] Implement `POST /api/cart/items`.
+- [x] Implement `PATCH /api/cart/items/:itemId`.
+- [x] Implement `DELETE /api/cart/items/:itemId`.
+- [x] Implement `POST /api/checkout`.
+- [x] Implement `GET /api/orders`.
+- [x] Implement `GET /api/orders/:id`.
+- [x] Implement `POST /api/orders/:id/cancel-request`.
+- [x] Implement `GET /api/admin/orders`.
+- [x] Implement `GET /api/admin/orders/:id`.
+- [x] Implement `PATCH /api/admin/orders/:id/status`.
+- [x] Implement `POST /api/admin/orders/:id/cancel`.
+- [x] Validate cart ownership.
+- [x] Validate stock before checkout.
+- [x] Implement mock payment for `COD` and `VNPAY`.
+- [x] Store order item price snapshots.
+- [x] Reduce stock in the same transaction as order creation.
+- [x] Clear cart after checkout.
+- [x] Prevent negative stock.
+- [x] Add Swagger decorators for CartAndOrder endpoints.
 
 Frontend tasks:
 
@@ -238,12 +239,12 @@ Frontend tasks:
 
 Done when:
 
-- [ ] Customer can add item to cart.
-- [ ] Customer can checkout successfully.
-- [ ] Stock decreases after checkout.
-- [ ] Order items keep price snapshots.
-- [ ] Customer can view order history.
-- [ ] Admin can update order status and cancel orders.
+- [x] Customer can add item to cart.
+- [x] Customer can checkout successfully.
+- [x] Stock decreases after checkout.
+- [x] Order items keep price snapshots.
+- [x] Customer can view order history.
+- [x] Admin can update order status and cancel orders.
 
 ## Phase 7: Frontend Quality Pass
 
@@ -305,12 +306,12 @@ Backend tests:
 - [x] Customer cannot access admin endpoints.
 - [x] Product filtering by type, size, and color.
 - [x] Admin product and variant management.
-- [ ] Cart add/update/remove.
-- [ ] Checkout validates stock.
-- [ ] Checkout creates order and reduces stock transactionally.
-- [ ] Order item price snapshot does not change after product price update.
-- [ ] Customer cancellation request only allowed for pending orders.
-- [ ] Admin order status update.
+- [x] Cart add/update/remove.
+- [x] Checkout validates stock.
+- [x] Checkout creates order and reduces stock transactionally.
+- [x] Order item price snapshot does not change after product price update.
+- [x] Customer cancellation request only allowed for pending orders.
+- [x] Admin order status update.
 
 Frontend checks:
 
@@ -334,10 +335,10 @@ Goal: prepare a clean interview demo path.
 Tasks:
 
 - [x] Create seeded admin credentials for local demo.
-- [ ] Create seeded customer account or demo registration path.
-- [ ] Seed at least one shirt, one pant, and one jacket.
-- [ ] Seed variants across sizes and colors.
-- [ ] Seed enough stock to complete checkout.
+- [x] Create seeded customer account or demo registration path.
+- [x] Seed at least one shirt, one pant, and one jacket through safe Postman admin API requests.
+- [x] Seed variants across sizes and colors through safe Postman admin API requests.
+- [x] Seed enough stock to complete checkout through safe Postman admin API requests.
 - [ ] Prepare a short demo script:
   - Customer registration/login.
   - Product browsing and filtering.

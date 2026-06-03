@@ -38,6 +38,7 @@ Admins can:
 - View product variants.
 - Create variants.
 - Update variant size, color, stock, and active status.
+- Upload product images to Cloudinary.
 - Manage product-level and variant-level image URLs.
 - Soft delete variants.
 
@@ -91,7 +92,8 @@ Variant images are optional and can be managed through variant create/update pay
 - Variant-level images are stored on `ProductImage` with `variantId` set.
 - Product create requires at least one product-level image.
 - Variant images are optional.
-- Images are URL strings only; file upload/storage is out of scope for MVP.
+- Images are uploaded to Cloudinary through an admin-only endpoint.
+- Product and variant records store Cloudinary URL strings only.
 - Image display order uses `sortOrder`.
 - `isPrimary` marks the preferred thumbnail image.
 - `thumbnailUrl` is selected from the primary product image, falling back to the first product image by `sortOrder`.
@@ -121,12 +123,14 @@ Reference only. Full request/response details are defined in `docs/01_API_CONTRA
 - `POST /api/admin/products/:productId/variants`
 - `PATCH /api/admin/variants/:variantId`
 - `DELETE /api/admin/variants/:variantId`
+- `POST /api/admin/uploads/product-images`
 
 ## Backend Services/Modules
 
 Recommended NestJS modules for this feature:
 
 - `ProductModule`
+- `UploadsModule`
 - `PrismaModule`
 - Auth guards from `AuthModule`
 
@@ -135,6 +139,8 @@ Recommended backend responsibilities:
 - `ProductsController`: customer product listing, detail, and options.
 - `AdminProductsController`: admin product and variant management.
 - `ProductsService`: product queries, product mutation, variant mutation, soft delete behavior.
+- `UploadsService`: validate product image files and upload them to Cloudinary.
+- `AdminUploadsController`: admin-only product image upload endpoint.
 - Product DTOs: validate product create/update payloads and product query parameters.
 - Variant DTOs: validate variant create/update payloads.
 - Product presenters: shape product responses to match `docs/01_API_CONTRACT.md`.
@@ -156,6 +162,9 @@ Data models used:
 - Product detail has no product images.
 - Admin creates product without product-level images.
 - Admin creates image with missing URL.
+- Admin uploads image with invalid MIME type.
+- Admin uploads image larger than 5MB.
+- Cloudinary upload fails.
 - Admin creates variant image for a variant that does not belong to the product.
 - Admin updates images and replaces current non-deleted images.
 - Admin creates product with invalid type.
@@ -212,6 +221,7 @@ Data models used:
 - [x] Update product list response to return `thumbnailUrl`.
 - [x] Update product detail response to return product-level `images`.
 - [x] Update product detail response to return variant-level `images`.
+- [x] Implement admin Cloudinary product image upload endpoint.
 
 ### Backend Validation and Rules
 
@@ -227,6 +237,8 @@ Data models used:
 - [x] Require at least one product-level image on product create.
 - [x] Validate image URL strings.
 - [x] Validate image `sortOrder`.
+- [x] Validate uploaded product image MIME type.
+- [x] Validate uploaded product image file size.
 - [x] Validate variant image ownership matches product.
 - [x] Replace current non-deleted images when `images` is provided on update.
 - [x] Hide inactive or deleted products from customer catalog.
@@ -254,9 +266,11 @@ Data models used:
 
 - [x] Add Swagger decorators for customer product endpoints.
 - [x] Add Swagger decorators for admin product endpoints.
-- [ ] Update Swagger DTOs for product and variant image arrays.
-- [ ] Update Product service unit tests for image behavior.
-- [ ] Update Product Postman collection for image payloads.
+- [x] Update Swagger DTOs for product and variant image arrays.
+- [x] Update Product service unit tests for image behavior.
+- [x] Update Product Postman collection for image payloads.
+- [x] Add Swagger docs for Cloudinary product image upload.
+- [x] Add upload service unit tests for Cloudinary image upload behavior.
 - [x] Add Product service unit tests listed in `docs/tests/product_service_test_plan.md`.
 - [x] Record Product service test results in `docs/tests/product_service_test_result.md`.
 - [x] Update `docs/TASK_BREAKDOWN.md` after implementation.

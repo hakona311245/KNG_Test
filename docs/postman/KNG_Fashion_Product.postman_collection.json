@@ -105,6 +105,56 @@
       ]
     },
     {
+      "name": "03 Optional Upload Product Image",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/uploads/product-images",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "uploads",
+            "product-images"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  pm.test('upload returns Cloudinary URL', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.message).to.equal('Image uploaded successfully');",
+              "    pm.expect(body.data.url).to.match(/^https:\\/\\//);",
+              "    pm.expect(body.data.publicId).to.be.a('string');",
+              "  });",
+              "} else {",
+              "  pm.test('optional upload skipped or Cloudinary not configured', function () {",
+              "    pm.expect([400, 500]).to.include(pm.response.code);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "03 Create Product",
       "request": {
         "method": "POST",
