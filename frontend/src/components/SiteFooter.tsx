@@ -4,8 +4,8 @@ import { ArrowRightIcon, ChevronLeftIcon } from './icons'
 const footerLinks = [
   { label: 'Home', to: '/' },
   { label: 'Collection', to: '/products' },
-  { label: 'Placeholder - About', to: '/about' },
-  { label: 'Placeholder - Contact', to: '/contact' },
+  { label: 'About', to: '/about' },
+  { label: 'Contact', to: '/contact' },
 ]
 
 const languages = ['ENG', 'VN']
@@ -33,23 +33,18 @@ export function SiteFooter() {
           </nav>
         </section>
 
-        <section className="lg:justify-self-center">
+        <section className="text-center lg:justify-self-center">
           <FooterLabel>KNG Fashion</FooterLabel>
           <Link
             to="/"
-            className="mt-7 flex w-fit items-center gap-6"
+            className="mx-auto mt-7 block w-fit"
             aria-label="KNG Fashion home"
           >
             <img
               src="/logo/KNG_Logo-removebg.png"
-              alt=""
-              className="size-20 object-contain lg:size-24"
+              alt="KNG Fashion"
+              className="size-32 object-contain sm:size-40 lg:size-52"
             />
-            <div className="text-[4.5rem] font-black uppercase leading-[0.78] tracking-normal text-[#111111] sm:text-[5.5rem] lg:text-[6.25rem]">
-              KNG
-              <br />
-              Store
-            </div>
           </Link>
         </section>
 
