@@ -192,18 +192,18 @@ These URLs are planned defaults and can be adjusted during implementation.
 ### Docker Files
 
 - [x] Add backend Dockerfile.
-- [ ] Add frontend Dockerfile.
+- [x] Add frontend Dockerfile.
 - [x] Add root `docker-compose.yml`.
 - [x] Add PostgreSQL service.
 - [x] Add backend service.
-- [ ] Add frontend service.
+- [x] Add frontend service.
 - [x] Add persistent PostgreSQL volume.
 - [ ] Add local network configuration if needed.
 
 ### Environment
 
 - [x] Add backend `.env.example`.
-- [ ] Add frontend `.env.example`.
+- [x] Add frontend `.env.example`.
 - [x] Add Docker Compose environment variables.
 - [x] Document local database credentials.
 - [x] Document JWT and cookie settings.
@@ -344,7 +344,7 @@ docker compose exec backend npx prisma studio
 
 ### Docker Done
 
-- [ ] `docker compose up --build` starts PostgreSQL, backend, and frontend.
+- [x] `docker compose up --build` starts PostgreSQL, backend, and frontend.
 - [x] Backend connects to PostgreSQL from Docker.
 - [ ] Migrations and seed can run locally.
 - [ ] Swagger and frontend are accessible from the documented URLs.
