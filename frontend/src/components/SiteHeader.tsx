@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../auth/useAuth'
 import { BagIcon, MenuIcon, UserIcon } from './icons'
 import { HeaderNavLink } from './links'
 
@@ -10,7 +11,15 @@ const categoryLinks = [
 ]
 
 export function SiteHeader() {
+  const location = useLocation()
+  const { isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const accountPath = isAuthenticated ? '/profile' : '/login'
+  const accountLabel = isAuthenticated ? 'Profile' : 'Login'
+  const accountState =
+    isAuthenticated || isAuthPath(location.pathname)
+      ? undefined
+      : { from: location }
 
   return (
     <header className="relative z-30">
@@ -43,17 +52,16 @@ export function SiteHeader() {
 
         <nav className="flex items-center justify-end gap-3 sm:gap-6">
 
-          <HeaderNavLink to="/cart">
-            <span className="hidden h-16 items-center rounded-full bg-[#111111] px-9 text-base font-semibold tracking-[0.18em] text-white md:inline-flex">
-              Cart
-            </span>
-          </HeaderNavLink>
-
           <HeaderIconLink label="Cart" to="/cart">
             <BagIcon className="size-5" />
           </HeaderIconLink>
 
-          <HeaderIconLink label="Profile" to="/login" inverted>
+          <HeaderIconLink
+            label={accountLabel}
+            state={accountState}
+            to={accountPath}
+            inverted
+          >
             <UserIcon className="size-5" />
           </HeaderIconLink>
         </nav>
@@ -93,17 +101,20 @@ function HeaderIconLink({
   className = '',
   inverted = true,
   label,
+  state,
   to,
 }: {
   children: ReactNode
   className?: string
   inverted?: boolean
   label: string
+  state?: unknown
   to: string
 }) {
   return (
     <Link
       to={to}
+      state={state}
       aria-label={label}
       className={[
         'grid size-11 place-items-center rounded-full border border-[#111111] transition sm:size-14',
@@ -115,5 +126,14 @@ function HeaderIconLink({
     >
       {children}
     </Link>
+  )
+}
+
+function isAuthPath(pathname: string) {
+  return (
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname.startsWith('/login/') ||
+    pathname.startsWith('/register/')
   )
 }

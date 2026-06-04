@@ -9,6 +9,21 @@ function GuardLoadingState() {
   )
 }
 
+export function AuthenticatedRouteGuard() {
+  const { isAuthenticated, isBootstrapping } = useAuth()
+  const location = useLocation()
+
+  if (isBootstrapping) {
+    return <GuardLoadingState />
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  return <Outlet />
+}
+
 export function CustomerRouteGuard() {
   const { isAuthenticated, isBootstrapping } = useAuth()
   const location = useLocation()

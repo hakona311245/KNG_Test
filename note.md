@@ -77,3 +77,18 @@
 - Backend CORS now supports `FRONTEND_URLS` as a comma-separated allowlist while keeping `FRONTEND_URL` for backward compatibility.
 - Local backend `.env` allows both `http://localhost:5173` and `http://localhost:5174`, because Vite may move to `5174` when `5173` is already in use.
 - Restart the backend after changing these env values; CORS headers are set at backend startup.
+
+## Frontend auth future work
+- `frontend/src/lib/api.ts` throws normalized `ApiError` objects from `unwrapData`, but `toApiError` does not recognize an already-normalized `ApiError`; shared error normalization should be updated in a focused auth/API cleanup so all callers preserve backend messages.
+
+## Frontend auth/profile handoff
+- Login now uses HttpOnly-cookie auth through `useAuth().login`; frontend still stores no JWTs.
+- Header account icon sends unauthenticated users to `/login` with current route as `state.from`; customer login returns there unless it is an admin route.
+- `/profile` is protected by an auth-only guard, shows profile details, recent customer orders, admin dashboard link for admins, and logout.
+- `/admin` has a `Back To Profile` link; admin login defaults to `/profile` unless the user was explicitly trying to access `/admin`.
+- Checks passed: `npm.cmd run lint`; `npm.cmd run build` passes through the approved elevated Vite/Tailwind native path.
+- Manual browser QA still needed for real customer/admin login redirects because Codex in-app Browser still reports no `iab` browser.
+
+## Admin dashboard handoff
+- Product/variant create, edit, delete, stock mutation, and Cloudinary image workflows remain deferred.
+- `docs/backend_frontend_integration.md` still lists `OrderStatus.SHIPPING`; Prisma/source docs use `PROCESSING` and `SHIPPED`.
