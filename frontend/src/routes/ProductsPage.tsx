@@ -38,10 +38,11 @@ export function ProductsPage() {
     () => ({
       limit: pageLimit,
       page: currentPage,
+      search: activeSearch || undefined,
       size: activeSize,
       type: activeType,
     }),
-    [activeSize, activeType, currentPage],
+    [activeSearch, activeSize, activeType, currentPage],
   )
 
   useEffect(() => {
@@ -150,6 +151,12 @@ export function ProductsPage() {
                 onSearch={handleSearchChange}
               />
             </div>
+
+            <SearchResultSummary
+              isLoading={isLoading}
+              search={activeSearch}
+              total={products?.total}
+            />
           </div>
 
           <button
@@ -176,7 +183,6 @@ export function ProductsPage() {
             error={error}
             isLoading={isLoading}
             products={products?.items ?? []}
-            search={activeSearch}
           />
 
           {products && totalPages > 1 ? (
@@ -222,12 +228,10 @@ function ProductContent({
   error,
   isLoading,
   products,
-  search,
 }: {
   error: ApiError | null
   isLoading: boolean
   products: ProductListItem[]
-  search: string
 }) {
   if (isLoading) {
     return (
@@ -254,9 +258,7 @@ function ProductContent({
     )
   }
 
-  const visibleProducts = filterProductsBySearch(products, search)
-
-  if (!visibleProducts.length) {
+  if (!products.length) {
     return (
       <div className="mt-10 border border-[#cfcfcf] bg-[#f4f4f1]/70 px-5 py-10 text-center">
         <h2 className="text-lg font-bold tracking-[0.08em]">
@@ -271,10 +273,35 @@ function ProductContent({
 
   return (
     <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:mt-10 lg:gap-x-10 lg:gap-y-11">
-      {visibleProducts.map((product) => (
+      {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
+  )
+}
+
+function SearchResultSummary({
+  isLoading,
+  search,
+  total,
+}: {
+  isLoading: boolean
+  search: string
+  total?: number
+}) {
+  if (!search) {
+    return null
+  }
+
+  const countLabel =
+    typeof total === 'number' && !isLoading
+      ? ` - ${total} ${total === 1 ? 'item' : 'items'}`
+      : ''
+
+  return (
+    <p className="mt-3 text-sm font-semibold leading-6 tracking-[0.08em] text-[#555555]">
+      Search results for "{search}"{countLabel}
+    </p>
   )
 }
 
@@ -384,19 +411,4 @@ function parsePage(value: string | null) {
 
 function formatProductType(type: ProductType) {
   return type === 'PANT' ? 'PANTS' : `${type}S`
-}
-
-function filterProductsBySearch(products: ProductListItem[], search: string) {
-  if (!search) {
-    return products
-  }
-
-  const normalizedSearch = search.toLowerCase()
-
-  return products.filter((product) =>
-    [product.name, product.material, product.type]
-      .join(' ')
-      .toLowerCase()
-      .includes(normalizedSearch),
-  )
 }

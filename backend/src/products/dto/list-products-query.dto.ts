@@ -4,6 +4,14 @@ import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { ProductType, Size } from '../../../generated/prisma/client';
 
 export class ListProductsQueryDto {
+  @ApiPropertyOptional({
+    description: 'Case-insensitive partial product name search.',
+    example: 'linen',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
   @ApiPropertyOptional({ enum: ProductType })
   @IsOptional()
   @IsEnum(ProductType)

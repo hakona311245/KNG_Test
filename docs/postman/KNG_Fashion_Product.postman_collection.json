@@ -519,7 +519,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/products?type=SHIRT&size=L&color=Black&page=1&limit=12",
+          "raw": "{{baseUrl}}/products?type=SHIRT&size=L&color=Black&search={{productName}}&page=1&limit=12",
           "host": [
             "{{baseUrl}}"
           ],
@@ -538,6 +538,10 @@
             {
               "key": "color",
               "value": "Black"
+            },
+            {
+              "key": "search",
+              "value": "{{productName}}"
             },
             {
               "key": "page",
@@ -562,6 +566,8 @@
               "pm.test('public list contains created product', function () {",
               "  const body = pm.response.json();",
               "  pm.expect(body.message).to.equal('Products retrieved successfully');",
+              "  const productName = pm.collectionVariables.get('productName').toLowerCase();",
+              "  pm.expect(body.data.items.every((item) => item.name.toLowerCase().includes(productName))).to.equal(true);",
               "  pm.expect(body.data.items.map((item) => item.id)).to.include(pm.collectionVariables.get('productId'));",
               "  pm.expect(body.data.items.find((item) => item.id === pm.collectionVariables.get('productId')).thumbnailUrl).to.equal('https://example.com/product-front.jpg');",
               "});"

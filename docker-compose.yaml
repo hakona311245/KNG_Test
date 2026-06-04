@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: kng-fashion-backend
     restart: unless-stopped
+    env_file:
+      - ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -23,8 +25,7 @@ services:
       ADMIN_PASSWORD: AdminPassword123
       ADMIN_FULL_NAME: KNG Admin
       ADMIN_PHONE_NUMBER: "0900000000"
-      CLOUDINARY_URL: cloudinary://replace-with-api-key:replace-with-api-secret@replace-with-cloud-name
-      CLOUDINARY_FOLDER: kng-fashion/products
+      CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-kng-fashion/products}
     ports:
       - "3000:3000"
     volumes:

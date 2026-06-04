@@ -21,6 +21,7 @@ The MVP supports only shirts, pants, and jackets. Product variants are defined b
 Customers can:
 
 - View active product listing.
+- Search products by name.
 - Filter products by type, size, and color.
 - View product detail.
 - View available variants and stock.
@@ -48,11 +49,12 @@ Admins can:
 
 A customer opens the product catalog and can filter by:
 
+- Product name search
 - Product type
 - Size
 - Color
 
-System returns only active, non-deleted products.
+System returns only active, non-deleted products. Product name search is case-insensitive, uses partial matching, and is applied before pagination.
 
 ### View Product Detail
 
@@ -155,6 +157,7 @@ Data models used:
 ## Edge Cases
 
 - Customer product list has no matching products.
+- Customer searches by product name with no matches.
 - Customer filters by invalid type or size.
 - Customer requests inactive product.
 - Customer requests soft-deleted product.
@@ -205,6 +208,7 @@ Data models used:
 - [x] Implement `ProductModule`.
 - [x] Register `ProductModule` in `AppModule`.
 - [x] Implement customer product list endpoint.
+- [x] Implement customer product search by name.
 - [x] Implement customer product detail endpoint.
 - [x] Implement product options endpoint.
 - [x] Implement admin product list endpoint.
@@ -228,6 +232,7 @@ Data models used:
 - [x] Add DTO validation for product create/update.
 - [x] Add DTO validation for variant create/update.
 - [x] Add DTO validation for product query filters.
+- [x] Add DTO validation for product name search query.
 - [x] Enforce fixed product types.
 - [x] Enforce fixed sizes.
 - [x] Allow free-text colors.
@@ -254,7 +259,8 @@ Data models used:
 
 ### Frontend
 
-- [ ] Build product listing page.
+- [x] Build product listing page.
+- [x] Add product name search.
 - [ ] Add filters for type, size, and color.
 - [ ] Build product detail page.
 - [ ] Add variant selection by size and color.

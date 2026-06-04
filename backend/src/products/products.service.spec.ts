@@ -158,6 +158,23 @@ describe('ProductsService', () => {
     );
   });
 
+  it('filters customer list by product name search', async () => {
+    prisma.product.findMany.mockReturnValue('findMany');
+    prisma.product.count.mockReturnValue('count');
+
+    await service.listProducts({ search: ' shirt ' });
+
+    expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          name: { contains: 'shirt', mode: 'insensitive' },
+          isActive: true,
+          deletedAt: null,
+        }),
+      }),
+    );
+  });
+
   it('filters customer list by variant size', async () => {
     prisma.product.findMany.mockReturnValue('findMany');
     prisma.product.count.mockReturnValue('count');

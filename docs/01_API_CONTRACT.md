@@ -395,11 +395,14 @@ GET /api/products
 
 Query parameters:
 
+- `search`: case-insensitive partial product name search
 - `type`: `SHIRT`, `PANT`, `JACKET`
 - `size`: `S`, `M`, `L`, `XL`
 - `color`: free-text color name
 - `page`
 - `limit`
+
+`search` is matched against product names only and is applied before pagination.
 
 Response:
 

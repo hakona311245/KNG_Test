@@ -12,6 +12,7 @@ Source references:
 
 | Test | Expected Behavior | Expected Result |
 | --- | --- | --- |
+| Customer list filters by name search | Query with `search=shirt` searches product names case-insensitively before pagination. | Service returns paginated products whose names contain `shirt`. |
 | Customer list filters by type | Query with `type=SHIRT` only searches matching product type. | Service returns paginated products with `type = SHIRT`. |
 | Customer list filters by size | Query with `size=M` only includes products with matching active variant. | Service returns products that have an active `M` variant. |
 | Customer list filters by color | Query with `color=Black` only includes products with matching active variant. | Service returns products that have an active `Black` variant. |

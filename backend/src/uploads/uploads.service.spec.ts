@@ -1,4 +1,14 @@
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { PassThrough } from 'node:stream';
+import type {
+  UploadApiOptions,
+  UploadApiResponse,
+  UploadResponseCallback,
+  UploadStream,
+} from 'cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
 import { PRODUCT_IMAGE_MAX_FILE_SIZE_BYTES } from './uploads.constants';
 import { UploadsService } from './uploads.service';
@@ -12,7 +22,17 @@ jest.mock('cloudinary', () => ({
   },
 }));
 
-function createConfigService(overrides: Record<string, string | undefined> = {}) {
+type UploadStreamWithOptions = (
+  options: UploadApiOptions,
+  callback: UploadResponseCallback,
+) => UploadStream;
+
+const uploadStreamMock = cloudinary.uploader
+  .upload_stream as unknown as jest.MockedFunction<UploadStreamWithOptions>;
+
+function createConfigService(
+  overrides: Record<string, string | undefined> = {},
+) {
   const values: Record<string, string | undefined> = {
     CLOUDINARY_CLOUD_NAME: 'demo-cloud',
     CLOUDINARY_API_KEY: 'demo-key',
@@ -24,7 +44,9 @@ function createConfigService(overrides: Record<string, string | undefined> = {})
     getOrThrow: jest.fn((key: string) => {
       return values[key];
     }),
-    get: jest.fn((key: string, defaultValue?: string) => values[key] ?? defaultValue),
+    get: jest.fn(
+      (key: string, defaultValue?: string) => values[key] ?? defaultValue,
+    ),
   };
 }
 
@@ -38,6 +60,13 @@ function createFile(overrides: Partial<Express.Multer.File> = {}) {
     buffer: Buffer.from('image'),
     ...overrides,
   } as Express.Multer.File;
+}
+
+function createUploadStream() {
+  const uploadStream = new PassThrough();
+  const end = jest.spyOn(uploadStream, 'end');
+
+  return { uploadStream, end };
 }
 
 describe('UploadsService', () => {
@@ -90,21 +119,20 @@ describe('UploadsService', () => {
   });
 
   it('uploads valid product image and returns Cloudinary metadata', async () => {
-    const end = jest.fn();
-    jest
-      .mocked(cloudinary.uploader.upload_stream)
-      .mockImplementation((_options, callback) => {
-        callback(undefined, {
-          secure_url: 'https://res.cloudinary.com/demo/product.jpg',
-          public_id: 'kng-fashion/products/product',
-          width: 1200,
-          height: 1600,
-          format: 'jpg',
-          bytes: 123456,
-        } as never);
+    const { uploadStream, end } = createUploadStream();
 
-        return { end } as never;
-      });
+    uploadStreamMock.mockImplementation((_options, callback) => {
+      callback(undefined, {
+        secure_url: 'https://res.cloudinary.com/demo/product.jpg',
+        public_id: 'kng-fashion/products/product',
+        width: 1200,
+        height: 1600,
+        format: 'jpg',
+        bytes: 123456,
+      } as UploadApiResponse);
+
+      return uploadStream;
+    });
 
     await expect(service.uploadProductImage(createFile())).resolves.toEqual({
       url: 'https://res.cloudinary.com/demo/product.jpg',
@@ -125,16 +153,19 @@ describe('UploadsService', () => {
   });
 
   it('returns server error when Cloudinary upload fails', async () => {
-    jest
-      .mocked(cloudinary.uploader.upload_stream)
-      .mockImplementation((_options, callback) => {
-        callback(new Error('Cloudinary failed'), undefined);
+    const { uploadStream } = createUploadStream();
 
-        return { end: jest.fn() } as never;
-      });
+    uploadStreamMock.mockImplementation((_options, callback) => {
+      callback(
+        { http_code: 500, message: 'Cloudinary failed' } as any,
+        undefined,
+      );
 
-    await expect(service.uploadProductImage(createFile())).rejects.toBeInstanceOf(
-      InternalServerErrorException,
-    );
+      return uploadStream;
+    });
+
+    await expect(
+      service.uploadProductImage(createFile()),
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 });

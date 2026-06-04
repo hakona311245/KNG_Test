@@ -1,8 +1,8 @@
 # Product Service Test Result
 
-Date: 2026-06-03
+Date: 2026-06-04
 
-Product image data model, Cloudinary upload support, backend logic, and unit tests were implemented.
+Product image data model, Cloudinary upload support, product name search, backend logic, and unit tests were implemented.
 
 ## Commands Run
 
@@ -10,38 +10,27 @@ From `backend/`:
 
 ```powershell
 npm run build
-npx tsc -p tsconfig.build.json --noEmit
 npm run test -- --runInBand
-docker compose up --build -d backend
-docker compose exec backend npm install
-docker compose logs backend --tail 120
 ```
 
 ## Summary
 
 | Check | Result |
 | --- | --- |
-| `npm run build` | Blocked by existing generated `backend/dist` permission lock |
-| `npx tsc -p tsconfig.build.json --noEmit` | Passed |
+| `npm run build` | Passed |
 | `npm run test -- --runInBand` | Passed |
-| `docker compose up --build -d backend` | Passed |
-| Backend container startup | Passed |
 
 ## Test Result
 
 ```text
-Test Suites: 6 passed, 6 total
-Tests:       41 passed, 41 total
+Test Suites: 7 passed, 7 total
+Tests:       58 passed, 58 total
 Snapshots:   0 total
-Time:        4.259 s
+Time:        5.62 s
 ```
 
 ## Notes
 
-- `npm run build` failed before TypeScript compilation with `EPERM: operation not permitted, unlink 'D:\Coding\KNG_Test\backend\dist\prisma.config.d.ts'`.
-- Stopping the backend Docker container did not release the existing `backend/dist` file permissions.
-- No-emit TypeScript validation passed, so ProductImage code is type-valid.
-- Docker rebuild succeeded, Nest watch compile found 0 errors, and the backend started successfully.
-- The Docker `backend_node_modules` named volume needed `docker compose exec backend npm install` before the container could see the new Cloudinary/Multer packages.
-- Cloudinary config now supports either `CLOUDINARY_URL` or separate Cloudinary credential variables.
+- Customer product list now includes a product-name search unit test.
+- Backend build and unit tests both passed on the local workspace.
 - No failed Product service tests remain to debug in the next step.

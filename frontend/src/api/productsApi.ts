@@ -9,6 +9,7 @@ import type {
 } from '../types/api'
 
 export type ListProductsParams = {
+  search?: string
   type?: ProductType
   size?: Size
   color?: string

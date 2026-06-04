@@ -158,6 +158,7 @@ Goal: implement customer catalog and admin product management.
 Backend tasks:
 
 - [x] Implement `GET /api/products`.
+- [x] Add product name search to `GET /api/products`.
 - [x] Implement `GET /api/products/:id`.
 - [x] Implement `GET /api/products/options`.
 - [x] Implement `GET /api/admin/products`.
@@ -182,6 +183,7 @@ Backend tasks:
 Frontend tasks:
 
 - [x] Build product listing page.
+- [x] Add product name search.
 - [x] Add filters for type and size.
 - [ ] Add color filter.
 - [ ] Build product detail page.
@@ -306,7 +308,7 @@ Backend tests:
 - [x] Refresh-token rotation.
 - [x] Logout revokes refresh session.
 - [x] Customer cannot access admin endpoints.
-- [x] Product filtering by type, size, and color.
+- [x] Product filtering by name, type, size, and color.
 - [x] Admin product and variant management.
 - [x] Cart add/update/remove.
 - [x] Checkout validates stock.

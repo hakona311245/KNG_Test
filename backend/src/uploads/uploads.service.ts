@@ -59,7 +59,7 @@ export class UploadsService {
           },
           (error, uploadResult) => {
             if (error) {
-              reject(error);
+              reject(this.toError(error));
               return;
             }
 
@@ -86,6 +86,23 @@ export class UploadsService {
     } catch {
       throw new InternalServerErrorException('Image upload failed.');
     }
+  }
+
+  private toError(error: unknown) {
+    if (error instanceof Error) {
+      return error;
+    }
+
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'message' in error &&
+      typeof (error as { message?: unknown }).message === 'string'
+    ) {
+      return new Error((error as { message: string }).message);
+    }
+
+    return new Error('Cloudinary upload failed.');
   }
 
   private validateProductImage(file?: Express.Multer.File) {

@@ -28,9 +28,13 @@ export class ProductsService {
   async listProducts(query: ListProductsQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 12;
-    const where = {
+    const search = query.search?.trim();
+    const where: Prisma.ProductWhereInput = {
       isActive: true,
       deletedAt: null,
+      ...(search
+        ? { name: { contains: search, mode: 'insensitive' as const } }
+        : {}),
       ...(query.type ? { type: query.type } : {}),
       ...(query.size || query.color
         ? {

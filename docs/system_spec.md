@@ -80,6 +80,7 @@ These URLs are planned defaults and can be adjusted during implementation.
 ### Product Service
 
 - [x] Implement customer product listing.
+- [x] Implement customer product name search.
 - [x] Implement product detail with variants.
 - [x] Implement product options endpoint for fixed product types and sizes.
 - [x] Implement admin product list/detail.
@@ -152,7 +153,8 @@ These URLs are planned defaults and can be adjusted during implementation.
 
 ### Customer UI
 
-- [ ] Build product listing page.
+- [x] Build product listing page.
+- [x] Add product name search.
 - [ ] Add filters for type, size, and color.
 - [ ] Build product detail page.
 - [ ] Add variant selection by size and color.

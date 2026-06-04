@@ -5,7 +5,15 @@ import {
   type ReactNode,
 } from 'react'
 import { Link } from 'react-router-dom'
-import { adminApi } from '../api/adminApi'
+import { adminApi, type CreateProductPayload, type CreateVariantPayload, type UpdateProductPayload, type UpdateVariantPayload } from '../api/adminApi'
+import {
+  ProductFormModal,
+  VariantFormModal,
+  type AdminProductFormMode,
+  type AdminProductFormValues,
+  type AdminVariantFormMode,
+  type AdminVariantFormValues,
+} from '../components/admin/AdminCatalogForms'
 import {
   AdminActionButton,
   AdminMetricGrid,
@@ -169,6 +177,11 @@ export function AdminDashboardPage() {
   const [products, setProducts] = useState<ProductListItem[]>([])
   const [productsTotal, setProductsTotal] = useState(0)
   const [variants, setVariants] = useState<AdminProductVariant[]>([])
+  const [productFormMode, setProductFormMode] =
+    useState<AdminProductFormMode | null>(null)
+  const [variantFormMode, setVariantFormMode] =
+    useState<AdminVariantFormMode | null>(null)
+  const [variantProductFilterId, setVariantProductFilterId] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<User | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null)
   const [loadError, setLoadError] = useState<ApiError | null>(null)
@@ -237,6 +250,12 @@ export function AdminDashboardPage() {
     }
   }, [commitDashboardData])
 
+  async function reloadDashboardData() {
+    const snapshot = await fetchAdminDashboardData()
+    commitDashboardData(snapshot)
+    setLoadError(null)
+  }
+
   async function handleReload() {
     setIsLoading(true)
     setLoadError(null)
@@ -244,8 +263,7 @@ export function AdminDashboardPage() {
     setActionMessage('')
 
     try {
-      const snapshot = await fetchAdminDashboardData()
-      commitDashboardData(snapshot)
+      await reloadDashboardData()
     } catch (error) {
       setLoadError(normalizeApiError(error))
     } finally {
@@ -364,12 +382,272 @@ export function AdminDashboardPage() {
     }
   }
 
+  function handleOpenAddProduct() {
+    setActionError(null)
+    setActionMessage('')
+    setProductFormMode({ kind: 'create' })
+  }
+
+  async function handleOpenEditProduct(productId: string) {
+    setPendingActionId(`product-edit-${productId}`)
+    setActionError(null)
+    setActionMessage('')
+
+    try {
+      const product = await adminApi.getProduct(productId)
+      setProductFormMode({ kind: 'edit', product })
+    } catch (error) {
+      setActionError(normalizeApiError(error))
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
+  async function handleProductFormSubmit(values: AdminProductFormValues) {
+    if (!productFormMode) {
+      const error: ApiError = { message: 'Product form is not ready.' }
+      throw error
+    }
+
+    setActionError(null)
+    setActionMessage('')
+    setPendingActionId(
+      productFormMode.kind === 'edit'
+        ? `product-submit-${productFormMode.product.id}`
+        : 'product-submit-new',
+    )
+
+    try {
+      if (productFormMode.kind === 'create') {
+        const payload: CreateProductPayload = {
+          description: values.description,
+          images: values.images,
+          material: values.material,
+          name: values.name,
+          price: values.price,
+          type: values.type,
+        }
+        const product = await adminApi.createProduct(payload)
+
+        setProductFormMode(null)
+        await reloadDashboardData()
+        setActionMessage(`${product.name} has been created.`)
+        return
+      }
+
+      const payload: UpdateProductPayload = {
+        description: values.description,
+        isActive: values.isActive,
+        material: values.material,
+        name: values.name,
+        price: values.price,
+        type: values.type,
+        ...(values.imagesChanged ? { images: values.images } : {}),
+      }
+      const product = await adminApi.updateProduct(
+        productFormMode.product.id,
+        payload,
+      )
+
+      setProductFormMode(null)
+      await reloadDashboardData()
+      setActionMessage(`${product.name} has been updated.`)
+    } catch (error) {
+      const apiError = normalizeApiError(error)
+      setActionError(apiError)
+      throw apiError
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
+  async function handleToggleProduct(product: ProductListItem) {
+    const nextIsActive = !product.isActive
+    setPendingActionId(`product-toggle-${product.id}`)
+    setActionError(null)
+    setActionMessage('')
+
+    try {
+      const updatedProduct = await adminApi.updateProduct(product.id, {
+        isActive: nextIsActive,
+      })
+      await reloadDashboardData()
+      setActionMessage(
+        `${updatedProduct.name} is now ${
+          updatedProduct.isActive ? 'active' : 'paused'
+        }.`,
+      )
+    } catch (error) {
+      setActionError(normalizeApiError(error))
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
+  async function handleSoftDeleteProduct(product: ProductListItem) {
+    const shouldDelete = window.confirm(
+      `Soft delete ${product.name}? It will disappear from the default admin and customer product lists.`,
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setPendingActionId(`product-delete-${product.id}`)
+    setActionError(null)
+    setActionMessage('')
+
+    try {
+      await adminApi.deleteProduct(product.id)
+      await reloadDashboardData()
+      setActionMessage(`${product.name} has been soft deleted.`)
+    } catch (error) {
+      setActionError(normalizeApiError(error))
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
+  function handleManageProductVariants(product: ProductListItem) {
+    setVariantProductFilterId(product.id)
+    setActiveSectionId('variants')
+    setActionError(null)
+    setActionMessage(`Showing variants for ${product.name}.`)
+  }
+
+  function handleOpenAddVariant(productId?: string) {
+    if (!products.length) {
+      setActionError({ message: 'Create a product before adding variants.' })
+      return
+    }
+
+    setActionError(null)
+    setActionMessage('')
+    setVariantFormMode({
+      kind: 'create',
+      productId: productId || variantProductFilterId || products[0].id,
+    })
+  }
+
+  function handleOpenEditVariant(variant: AdminProductVariant) {
+    setActionError(null)
+    setActionMessage('')
+    setVariantFormMode({
+      kind: 'edit',
+      productId: variant.productId,
+      productName: variant.productName,
+      variant,
+    })
+  }
+
+  async function handleVariantFormSubmit(values: AdminVariantFormValues) {
+    if (!variantFormMode) {
+      const error: ApiError = { message: 'Variant form is not ready.' }
+      throw error
+    }
+
+    setActionError(null)
+    setActionMessage('')
+    setPendingActionId(
+      variantFormMode.kind === 'edit'
+        ? `variant-submit-${variantFormMode.variant.id}`
+        : 'variant-submit-new',
+    )
+
+    try {
+      if (variantFormMode.kind === 'create') {
+        const payload: CreateVariantPayload = {
+          color: values.color,
+          size: values.size,
+          stock: values.stock,
+          ...(values.images.length ? { images: values.images } : {}),
+        }
+        await adminApi.createVariant(values.productId, payload)
+
+        setVariantFormMode(null)
+        setVariantProductFilterId(values.productId)
+        await reloadDashboardData()
+        setActionMessage('Variant has been created.')
+        return
+      }
+
+      const payload: UpdateVariantPayload = {
+        color: values.color,
+        isActive: values.isActive,
+        size: values.size,
+        stock: values.stock,
+        ...(values.imagesChanged ? { images: values.images } : {}),
+      }
+      await adminApi.updateVariant(variantFormMode.variant.id, payload)
+
+      setVariantFormMode(null)
+      await reloadDashboardData()
+      setActionMessage('Variant has been updated.')
+    } catch (error) {
+      const apiError = normalizeApiError(error)
+      setActionError(apiError)
+      throw apiError
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
+  async function handleToggleVariant(variant: AdminProductVariant) {
+    const nextIsActive = !variant.isActive
+    setPendingActionId(`variant-toggle-${variant.id}`)
+    setActionError(null)
+    setActionMessage('')
+
+    try {
+      await adminApi.updateVariant(variant.id, {
+        isActive: nextIsActive,
+      })
+      await reloadDashboardData()
+      setActionMessage(
+        `${variant.productName} ${variant.size} ${variant.color} is now ${
+          nextIsActive ? 'active' : 'inactive'
+        }.`,
+      )
+    } catch (error) {
+      setActionError(normalizeApiError(error))
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
+  async function handleSoftDeleteVariant(variant: AdminProductVariant) {
+    const shouldDelete = window.confirm(
+      `Soft delete ${variant.productName} ${variant.size} ${variant.color}?`,
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setPendingActionId(`variant-delete-${variant.id}`)
+    setActionError(null)
+    setActionMessage('')
+
+    try {
+      await adminApi.deleteVariant(variant.id)
+      await reloadDashboardData()
+      setActionMessage('Variant has been soft deleted.')
+    } catch (error) {
+      setActionError(normalizeApiError(error))
+    } finally {
+      setPendingActionId(null)
+    }
+  }
+
   const overviewMetrics = createOverviewMetrics({
     customersTotal,
     ordersTotal,
     productsTotal,
     variantsLoaded: variants.length,
   })
+  const visibleVariants = variantProductFilterId
+    ? variants.filter((variant) => variant.productId === variantProductFilterId)
+    : variants
 
   const productRows = products.map((product) => ({
     id: product.id,
@@ -391,13 +669,35 @@ export function AdminDashboardPage() {
     },
     actions: (
       <AdminActionGroup>
-        <AdminActionButton>Edit Later</AdminActionButton>
-        <AdminActionButton>Variants Later</AdminActionButton>
+        <AdminActionButton
+          disabled={pendingActionId === `product-edit-${product.id}`}
+          onClick={() => void handleOpenEditProduct(product.id)}
+        >
+          Edit
+        </AdminActionButton>
+        <AdminActionButton
+          disabled={pendingActionId === `product-toggle-${product.id}`}
+          onClick={() => void handleToggleProduct(product)}
+        >
+          {product.isActive ? 'Pause' : 'Activate'}
+        </AdminActionButton>
+        <AdminActionButton
+          disabled={false}
+          onClick={() => handleManageProductVariants(product)}
+        >
+          Variants
+        </AdminActionButton>
+        <AdminActionButton
+          disabled={pendingActionId === `product-delete-${product.id}`}
+          onClick={() => void handleSoftDeleteProduct(product)}
+        >
+          Delete
+        </AdminActionButton>
       </AdminActionGroup>
     ),
   }))
 
-  const variantRows = variants.map((variant) => ({
+  const variantRows = visibleVariants.map((variant) => ({
     id: variant.id,
     cells: {
       color: variant.color,
@@ -415,7 +715,24 @@ export function AdminDashboardPage() {
     },
     actions: (
       <AdminActionGroup>
-        <AdminActionButton>Stock Later</AdminActionButton>
+        <AdminActionButton
+          disabled={false}
+          onClick={() => handleOpenEditVariant(variant)}
+        >
+          Edit
+        </AdminActionButton>
+        <AdminActionButton
+          disabled={pendingActionId === `variant-toggle-${variant.id}`}
+          onClick={() => void handleToggleVariant(variant)}
+        >
+          {variant.isActive ? 'Pause' : 'Activate'}
+        </AdminActionButton>
+        <AdminActionButton
+          disabled={pendingActionId === `variant-delete-${variant.id}`}
+          onClick={() => void handleSoftDeleteVariant(variant)}
+        >
+          Delete
+        </AdminActionButton>
       </AdminActionGroup>
     ),
   }))
@@ -538,8 +855,12 @@ export function AdminDashboardPage() {
           <>
             <AdminBackLink />
             {activeSectionId === 'products' ? (
-              <AdminActionButton variant="primary">
-                Add Product Later
+              <AdminActionButton
+                disabled={false}
+                variant="primary"
+                onClick={handleOpenAddProduct}
+              >
+                Add Product
               </AdminActionButton>
             ) : null}
           </>
@@ -567,7 +888,13 @@ export function AdminDashboardPage() {
               <ProductsPanel productRows={productRows} />
             ) : null}
             {activeSectionId === 'variants' ? (
-              <VariantsPanel variantRows={variantRows} />
+              <VariantsPanel
+                products={products}
+                selectedProductId={variantProductFilterId}
+                variantRows={variantRows}
+                onAddVariant={handleOpenAddVariant}
+                onProductFilterChange={setVariantProductFilterId}
+              />
             ) : null}
             {activeSectionId === 'orders' ? (
               <OrdersPanel
@@ -601,6 +928,33 @@ export function AdminDashboardPage() {
         <p className="sr-only" aria-live="polite">
           Showing {activeSection.label}
         </p>
+      ) : null}
+
+      {productFormMode ? (
+        <ProductFormModal
+          key={
+            productFormMode.kind === 'edit'
+              ? `edit-${productFormMode.product.id}`
+              : 'create-product'
+          }
+          mode={productFormMode}
+          onClose={() => setProductFormMode(null)}
+          onSubmit={handleProductFormSubmit}
+        />
+      ) : null}
+
+      {variantFormMode ? (
+        <VariantFormModal
+          key={
+            variantFormMode.kind === 'edit'
+              ? `edit-${variantFormMode.variant.id}`
+              : `create-variant-${variantFormMode.productId ?? 'none'}`
+          }
+          mode={variantFormMode}
+          products={products}
+          onClose={() => setVariantFormMode(null)}
+          onSubmit={handleVariantFormSubmit}
+        />
       ) : null}
     </AdminShell>
   )
@@ -764,7 +1118,7 @@ function ProductsPanel({ productRows }: { productRows: AdminTableRow[] }) {
     <AdminSectionPanel
       eyebrow="Catalog"
       title="Products"
-      description="Catalog data is live. Create, edit, image upload, and soft delete controls are deferred for the Cloudinary product slice."
+      description="Catalog data is live. Add, edit, pause, and soft delete products from this table."
     >
       <AdminTable
         columns={productColumns}
@@ -775,13 +1129,51 @@ function ProductsPanel({ productRows }: { productRows: AdminTableRow[] }) {
   )
 }
 
-function VariantsPanel({ variantRows }: { variantRows: AdminTableRow[] }) {
+function VariantsPanel({
+  products,
+  selectedProductId,
+  variantRows,
+  onAddVariant,
+  onProductFilterChange,
+}: {
+  products: ProductListItem[]
+  selectedProductId: string
+  variantRows: AdminTableRow[]
+  onAddVariant: (productId?: string) => void
+  onProductFilterChange: (productId: string) => void
+}) {
   return (
     <AdminSectionPanel
       eyebrow="Inventory"
       title="Variants & Stock"
-      description="Stock is loaded from each listed product's variants. Variant editing is deferred for the Cloudinary product slice."
+      description="Manage size and color combinations, active status, stock, and optional variant images."
     >
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <label className="block sm:min-w-72">
+          <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#777777]">
+            Product Filter
+          </span>
+          <select
+            className="mt-2 h-10 w-full border border-[#d3d3d3] bg-white px-3 text-sm font-semibold text-[#111111] outline-none transition focus:border-[#111111]"
+            value={selectedProductId}
+            onChange={(event) => onProductFilterChange(event.currentTarget.value)}
+          >
+            <option value="">All Products</option>
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <AdminActionButton
+          disabled={products.length === 0}
+          variant="primary"
+          onClick={() => onAddVariant(selectedProductId || undefined)}
+        >
+          Add Variant
+        </AdminActionButton>
+      </div>
       <AdminTable
         columns={variantColumns}
         rows={variantRows}
