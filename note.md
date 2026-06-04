@@ -65,6 +65,14 @@
 - Product cards use real backend names, material, prices, colors, and thumbnail URLs, with local fallback images when a product has no thumbnail.
 - Next product work: build `/products/:id` detail page and wire variant selection before cart add.
 
+## Homepage product card integration
+- Home page now fetches featured products through `productsApi.listProducts({ page: 1, limit: 6 })`.
+- Desktop home hero reuses `ProductCard` for the two visible product cards instead of static product images.
+- Mobile home product strip also reuses `ProductCard` with real backend products.
+- Desktop carousel arrows cycle through the loaded featured products.
+- Home search is now an input form; submitting routes to `/products?search=...`.
+- `/products` reads the `search` URL param and applies a lightweight client-side filter over the loaded product page until backend search exists.
+
 ## CORS local dev note
 - Backend CORS now supports `FRONTEND_URLS` as a comma-separated allowlist while keeping `FRONTEND_URL` for backward compatibility.
 - Local backend `.env` allows both `http://localhost:5173` and `http://localhost:5174`, because Vite may move to `5174` when `5173` is already in use.

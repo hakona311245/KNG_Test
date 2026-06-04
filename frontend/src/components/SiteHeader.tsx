@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { BagIcon, HeartIcon, MenuIcon, UserIcon } from './icons'
+import { BagIcon, MenuIcon, UserIcon } from './icons'
 import { HeaderNavLink } from './links'
 
 const categoryLinks = [
@@ -35,16 +35,13 @@ export function SiteHeader() {
 
         <HeaderNavLink to="/">
           <img
-            src="/logo/KNG_Logo_transparent.png"
+            src="/logo/KNG_Logo-removebg.png"
             alt="KNG Fashion"
             className="size-12 object-contain sm:size-14 lg:size-16"
           />
         </HeaderNavLink>
 
         <nav className="flex items-center justify-end gap-3 sm:gap-6">
-          <HeaderIconLink label="Wishlist" to="/products" className="hidden md:grid">
-            <HeartIcon className="size-5" />
-          </HeaderIconLink>
 
           <HeaderNavLink to="/cart">
             <span className="hidden h-16 items-center rounded-full bg-[#111111] px-9 text-base font-semibold tracking-[0.18em] text-white md:inline-flex">

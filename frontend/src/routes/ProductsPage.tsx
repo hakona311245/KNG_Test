@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { productsApi } from '../api/productsApi'
-import { CategoryChips } from '../components/CategoryChips'
 import { ProductCard } from '../components/ProductCard'
 import { ProductFilterPanel } from '../components/ProductFilterPanel'
 import { SearchBar } from '../components/SearchBar'
@@ -32,6 +31,7 @@ export function ProductsPage() {
 
   const activeType = parseProductType(searchParams.get('type'))
   const activeSize = parseSize(searchParams.get('size'))
+  const activeSearch = searchParams.get('search')?.trim() ?? ''
   const currentPage = parsePage(searchParams.get('page'))
 
   const query = useMemo(
@@ -85,7 +85,6 @@ export function ProductsPage() {
   }, [query])
 
   const totalPages = products ? Math.ceil(products.total / products.limit) : 0
-  const productCount = products?.total ?? 0
 
   function updateSearchParam(key: string, value?: string) {
     const nextParams = new URLSearchParams(searchParams)
@@ -111,6 +110,10 @@ export function ProductsPage() {
     updateSearchParam('size', size)
   }
 
+  function handleSearchChange(search?: string) {
+    updateSearchParam('search', search?.trim() || undefined)
+  }
+
   function handlePageChange(page: number) {
     updateSearchParam('page', String(page))
     window.scrollTo({ behavior: 'smooth', top: 0 })
@@ -121,9 +124,10 @@ export function ProductsPage() {
       <div className="grid gap-8 lg:grid-cols-[255px_minmax(0,1fr)] lg:gap-12">
         <ProductFilterPanel
           activeSize={activeSize}
+          activeType={activeType}
           className="hidden pt-24 lg:block"
           onSizeChange={handleSizeChange}
-          productCount={productCount}
+          onTypeChange={handleTypeChange}
           sizes={options?.sizes}
         />
 
@@ -139,11 +143,11 @@ export function ProductsPage() {
               PRODUCTS
             </h1>
 
-            <div className="mt-4 grid gap-5 xl:grid-cols-[minmax(320px,430px)_minmax(0,1fr)] xl:items-start">
-              <SearchBar />
-              <CategoryChips
-                activeType={activeType}
-                onTypeChange={handleTypeChange}
+            <div className="mt-4 max-w-[430px]">
+              <SearchBar
+                key={activeSearch}
+                initialValue={activeSearch}
+                onSearch={handleSearchChange}
               />
             </div>
           </div>
@@ -161,7 +165,9 @@ export function ProductsPage() {
 
           <ActiveFilterSummary
             activeSize={activeSize}
+            activeSearch={activeSearch}
             activeType={activeType}
+            onSearchChange={handleSearchChange}
             onSizeChange={handleSizeChange}
             onTypeChange={handleTypeChange}
           />
@@ -170,6 +176,7 @@ export function ProductsPage() {
             error={error}
             isLoading={isLoading}
             products={products?.items ?? []}
+            search={activeSearch}
           />
 
           {products && totalPages > 1 ? (
@@ -192,13 +199,17 @@ export function ProductsPage() {
           />
           <ProductFilterPanel
             activeSize={activeSize}
+            activeType={activeType}
             className="relative h-full w-[58vw] min-w-[214px] max-w-[250px] overflow-y-auto bg-[#f4f4f1] bg-[url('/noisy_background.png')] px-6 py-10 shadow-2xl"
             onClose={() => setIsFilterOpen(false)}
             onSizeChange={(size) => {
               handleSizeChange(size)
               setIsFilterOpen(false)
             }}
-            productCount={productCount}
+            onTypeChange={(type) => {
+              handleTypeChange(type)
+              setIsFilterOpen(false)
+            }}
             sizes={options?.sizes}
           />
         </div>
@@ -211,10 +222,12 @@ function ProductContent({
   error,
   isLoading,
   products,
+  search,
 }: {
   error: ApiError | null
   isLoading: boolean
   products: ProductListItem[]
+  search: string
 }) {
   if (isLoading) {
     return (
@@ -241,14 +254,16 @@ function ProductContent({
     )
   }
 
-  if (!products.length) {
+  const visibleProducts = filterProductsBySearch(products, search)
+
+  if (!visibleProducts.length) {
     return (
       <div className="mt-10 border border-[#cfcfcf] bg-[#f4f4f1]/70 px-5 py-10 text-center">
         <h2 className="text-lg font-bold tracking-[0.08em]">
           No products found
         </h2>
         <p className="mt-2 text-sm leading-6 text-[#555555]">
-          Try changing the selected category or size.
+          Try changing the selected category, size, or search.
         </p>
       </div>
     )
@@ -256,7 +271,7 @@ function ProductContent({
 
   return (
     <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:mt-10 lg:gap-x-10 lg:gap-y-11">
-      {products.map((product) => (
+      {visibleProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
@@ -265,16 +280,20 @@ function ProductContent({
 
 function ActiveFilterSummary({
   activeSize,
+  activeSearch,
   activeType,
+  onSearchChange,
   onSizeChange,
   onTypeChange,
 }: {
   activeSize?: Size
+  activeSearch: string
   activeType?: ProductType
+  onSearchChange: (search?: string) => void
   onSizeChange: (size?: Size) => void
   onTypeChange: (type?: ProductType) => void
 }) {
-  if (!activeSize && !activeType) {
+  if (!activeSize && !activeSearch && !activeType) {
     return null
   }
 
@@ -296,6 +315,15 @@ function ActiveFilterSummary({
           onClick={() => onSizeChange(undefined)}
         >
           Size {activeSize} x
+        </button>
+      ) : null}
+      {activeSearch ? (
+        <button
+          type="button"
+          className="border border-[#bdbdbd] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]"
+          onClick={() => onSearchChange(undefined)}
+        >
+          Search {activeSearch} x
         </button>
       ) : null}
     </div>
@@ -356,4 +384,19 @@ function parsePage(value: string | null) {
 
 function formatProductType(type: ProductType) {
   return type === 'PANT' ? 'PANTS' : `${type}S`
+}
+
+function filterProductsBySearch(products: ProductListItem[], search: string) {
+  if (!search) {
+    return products
+  }
+
+  const normalizedSearch = search.toLowerCase()
+
+  return products.filter((product) =>
+    [product.name, product.material, product.type]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedSearch),
+  )
 }

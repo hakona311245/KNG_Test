@@ -16,7 +16,9 @@ const vndFormatter = new Intl.NumberFormat('vi-VN', {
 
 export function ProductCard({ product }: { product: ProductListItem }) {
   const fallbackImage = fallbackImages[product.type]
-  const [imageUrl, setImageUrl] = useState(product.thumbnailUrl ?? fallbackImage)
+  const [imageUrl, setImageUrl] = useState(
+    getInitialImageUrl(product.thumbnailUrl, fallbackImage),
+  )
   const colorsToShow = product.availableColors.slice(0, 1)
   const remainingColorCount = Math.max(product.availableColors.length - 1, 0)
 
@@ -66,6 +68,14 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 
 function formatProductPrice(price: number) {
   return vndFormatter.format(price).replace(/\s/g, ' ')
+}
+
+function getInitialImageUrl(thumbnailUrl: string | null, fallbackImage: string) {
+  if (!thumbnailUrl || thumbnailUrl.includes('example.com')) {
+    return fallbackImage
+  }
+
+  return thumbnailUrl
 }
 
 function getSwatchColor(color: string) {

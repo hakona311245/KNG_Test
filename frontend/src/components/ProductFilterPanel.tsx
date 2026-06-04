@@ -1,29 +1,29 @@
-import type { Size } from '../types/api'
+import type { ProductType, Size } from '../types/api'
 import { ChevronLeftIcon, ChevronRightIcon } from './icons'
 
 const fallbackSizes: Size[] = ['S', 'M', 'L', 'XL']
-const collapsedRows = [
-  'Category',
-  'Colors',
-  'Price Range',
-  'Collections',
-  'Tags',
-  'Ratings',
+const categoryOptions: Array<{ label: string; value: ProductType }> = [
+  { label: 'SHIRT', value: 'SHIRT' },
+  { label: 'PANTS', value: 'PANT' },
+  { label: 'JACKET', value: 'JACKET' },
 ]
+const collapsedRows = ['Colors', 'Price Range', 'Collections', 'Tags', 'Ratings']
 
 export function ProductFilterPanel({
   activeSize,
+  activeType,
   className = '',
   onClose,
   onSizeChange,
-  productCount,
+  onTypeChange,
   sizes,
 }: {
   activeSize?: Size
+  activeType?: ProductType
   className?: string
   onClose?: () => void
   onSizeChange: (size?: Size) => void
-  productCount: number
+  onTypeChange: (type?: ProductType) => void
   sizes?: Size[]
 }) {
   const sizeOptions = sizes?.length ? sizes : fallbackSizes
@@ -73,28 +73,39 @@ export function ProductFilterPanel({
         </div>
       </div>
 
-      <div className="mt-8 border-b border-dashed border-[#d0d0d0] pb-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold tracking-[0.14em] text-[#111111]">
-            Availability
-          </h3>
-          <ChevronLeftIcon className="size-4 rotate-90" />
-        </div>
-        <div className="mt-4 space-y-4 text-sm font-medium tracking-[0.12em]">
-          <label className="flex items-center gap-3">
-            <span className="size-6 border border-[#bdbdbd]" />
-            <span>Availability</span>
-            <span className="text-[#1f3294]">({productCount})</span>
-          </label>
-          <label className="flex items-center gap-3 text-[#333333]">
-            <span className="size-6 border border-[#bdbdbd]" />
-            <span>Out Of Stock</span>
-            <span className="text-[#1f3294]">(0)</span>
-          </label>
-        </div>
-      </div>
+      <div className="mt-8">
+        <div className="border-b border-dashed border-[#d0d0d0] py-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold tracking-[0.08em] text-[#111111]">
+              Category
+            </h3>
+            <ChevronLeftIcon className="size-4 rotate-90" />
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-2">
+            {categoryOptions.map((category) => {
+              const isActive = category.value === activeType
 
-      <div>
+              return (
+                <button
+                  key={category.value}
+                  type="button"
+                  className={[
+                    'h-9 border px-3 text-left text-xs font-semibold tracking-[0.14em] transition',
+                    isActive
+                      ? 'border-[#111111] bg-[#111111] text-white'
+                      : 'border-[#bdbdbd] bg-transparent text-[#111111] hover:border-[#111111]',
+                  ].join(' ')}
+                  onClick={() =>
+                    onTypeChange(isActive ? undefined : category.value)
+                  }
+                >
+                  {category.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         {collapsedRows.map((row) => (
           <button
             key={row}
